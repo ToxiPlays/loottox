@@ -1,0 +1,313 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+import EventEmitter from './event-emitter.js';
+function setWebAudioSessionPlayback() {
+    const navigator = globalThis.navigator;
+    if (!(navigator === null || navigator === void 0 ? void 0 : navigator.audioSession))
+        return;
+    try {
+        navigator.audioSession.type = 'playback';
+    }
+    catch (e) {
+        console.warn('Setting navigator.audioSession.type failed:', e);
+    }
+}
+/**
+ * A Web Audio buffer player emulating the behavior of an HTML5 Audio element.
+ *
+ * Note: This class does not manage blob: URLs. If you pass a blob: URL to setSrc(),
+ * you are responsible for revoking it when done. The Player class (player.ts) handles
+ * blob URL lifecycle management automatically.
+ */
+class WebAudioPlayer extends EventEmitter {
+    constructor(audioContext) {
+        super();
+        this.bufferNode = null;
+        this.playStartTime = 0;
+        this.playbackPosition = 0;
+        this._muted = false;
+        this._playbackRate = 1;
+        this._duration = undefined;
+        this.buffer = null;
+        this.currentSrc = '';
+        this.paused = true;
+        this.crossOrigin = null;
+        this.seeking = false;
+        this.autoplay = false;
+        /** Subscribe to an event. Returns an unsubscribe function. */
+        this.addEventListener = this.on;
+        /** Unsubscribe from an event */
+        this.removeEventListener = this.un;
+        this._destroyed = false;
+        setWebAudioSessionPlayback();
+        this.audioContext = audioContext || new AudioContext();
+        this.gainNode = this.audioContext.createGain();
+        this.gainNode.connect(this.audioContext.destination);
+    }
+    load() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return;
+        });
+    }
+    /** For compatibility with HTMLMediaElement.remove(). Delegates to destroy(). */
+    remove() {
+        this.destroy();
+    }
+    /** Clean up all resources. Idempotent — safe to call multiple times. */
+    destroy() {
+        if (this._destroyed)
+            return;
+        this._destroyed = true;
+        // Clear currentSrc so any in-flight fetch/decode chains bail out
+        // via their existing `this.currentSrc !== value` guards
+        this.currentSrc = '';
+        // Stop and disconnect buffer node
+        if (this.bufferNode) {
+            this.bufferNode.onended = null;
+            try {
+                this.bufferNode.stop();
+            }
+            catch (_a) {
+                // Ignore InvalidStateError if node already stopped
+            }
+            this.bufferNode.disconnect();
+            this.bufferNode = null;
+        }
+        // Disconnect gain node
+        this.gainNode.disconnect();
+        // Close audio context (returns a promise, catch rejection if already closed)
+        // Guard with typeof check for mock environments where close may not exist
+        if (typeof this.audioContext.close === 'function') {
+            Promise.resolve(this.audioContext.close.call(this.audioContext)).catch(() => undefined);
+        }
+        // Clear buffer reference
+        this.buffer = null;
+        // Clear all event listeners
+        this.unAll();
+    }
+    get src() {
+        return this.currentSrc;
+    }
+    set src(value) {
+        this.currentSrc = value;
+        this._duration = undefined;
+        if (!value) {
+            this.buffer = null;
+            this.emit('emptied');
+            return;
+        }
+        fetch(value)
+            .then((response) => {
+            if (response.status >= 400) {
+                throw new Error(`Failed to fetch ${value}: ${response.status} (${response.statusText})`);
+            }
+            return response.arrayBuffer();
+        })
+            .then((arrayBuffer) => {
+            if (this.currentSrc !== value)
+                return null;
+            return this.audioContext.decodeAudioData(arrayBuffer);
+        })
+            .then((audioBuffer) => {
+            if (this.currentSrc !== value)
+                return;
+            this.buffer = audioBuffer;
+            this.emit('loadedmetadata');
+            this.emit('canplay');
+            if (this.autoplay)
+                this.play();
+        })
+            .catch((err) => {
+            // Emit error for proper error handling
+            console.error('WebAudioPlayer load error:', err);
+        });
+    }
+    _play() {
+        if (!this.paused)
+            return;
+        this.paused = false;
+        // Clean up old buffer node completely before creating new one
+        if (this.bufferNode) {
+            this.bufferNode.onended = null;
+            this.bufferNode.disconnect();
+        }
+        this.bufferNode = this.audioContext.createBufferSource();
+        if (this.buffer) {
+            this.bufferNode.buffer = this.buffer;
+        }
+        this.bufferNode.playbackRate.value = this._playbackRate;
+        this.bufferNode.connect(this.gainNode);
+        let currentPos = this.playbackPosition;
+        if (currentPos >= this.duration || currentPos < 0) {
+            currentPos = 0;
+            this.playbackPosition = 0;
+        }
+        this.bufferNode.start(this.audioContext.currentTime, currentPos);
+        this.playStartTime = this.audioContext.currentTime;
+        this.bufferNode.onended = () => {
+            if (!this.paused && this.duration - this.currentTime < 0.01) {
+                this.pause();
+                this.emit('ended');
+            }
+        };
+    }
+    _pause() {
+        this.paused = true;
+        // Clear onended before stopping to prevent spurious 'ended' event
+        if (this.bufferNode) {
+            this.bufferNode.onended = null;
+            try {
+                this.bufferNode.stop();
+            }
+            catch (_a) {
+                // Ignore InvalidStateError if node already stopped
+            }
+        }
+        this.playbackPosition += (this.audioContext.currentTime - this.playStartTime) * this._playbackRate;
+    }
+    play() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.paused)
+                return;
+            this._play();
+            this.emit('play');
+        });
+    }
+    pause() {
+        if (this.paused)
+            return;
+        this._pause();
+        this.emit('pause');
+    }
+    stopAt(timeSeconds) {
+        // The stop is scheduled on the AudioContext clock, so convert the remaining
+        // media time to real time via the playback rate
+        const delay = (timeSeconds - this.currentTime) / this._playbackRate;
+        const currentBufferNode = this.bufferNode;
+        currentBufferNode === null || currentBufferNode === void 0 ? void 0 : currentBufferNode.stop(this.audioContext.currentTime + delay);
+        currentBufferNode === null || currentBufferNode === void 0 ? void 0 : currentBufferNode.addEventListener('ended', () => {
+            if (currentBufferNode === this.bufferNode) {
+                this.bufferNode = null;
+                this.pause();
+                // The 'ended' event fires with some latency, so clamp the reported
+                // position to the exact stop time
+                this.playbackPosition = Math.min(timeSeconds, this.duration);
+                this.emit('timeupdate');
+            }
+        }, { once: true });
+    }
+    setSinkId(deviceId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const ac = this.audioContext;
+            return ac.setSinkId(deviceId);
+        });
+    }
+    get playbackRate() {
+        return this._playbackRate;
+    }
+    set playbackRate(value) {
+        const wasPlaying = !this.paused;
+        if (wasPlaying)
+            this._pause();
+        this._playbackRate = value;
+        if (wasPlaying)
+            this._play();
+        if (this.bufferNode) {
+            this.bufferNode.playbackRate.value = value;
+        }
+    }
+    get currentTime() {
+        return this.paused
+            ? this.playbackPosition
+            : this.playbackPosition + (this.audioContext.currentTime - this.playStartTime) * this._playbackRate;
+    }
+    set currentTime(value) {
+        const wasPlaying = !this.paused;
+        if (wasPlaying)
+            this._pause();
+        this.playbackPosition = value;
+        if (wasPlaying)
+            this._play();
+        this.emit('seeking');
+        this.emit('timeupdate');
+    }
+    get duration() {
+        var _a, _b;
+        return (_a = this._duration) !== null && _a !== void 0 ? _a : (((_b = this.buffer) === null || _b === void 0 ? void 0 : _b.duration) || 0);
+    }
+    set duration(value) {
+        this._duration = value;
+    }
+    get volume() {
+        return this.gainNode.gain.value;
+    }
+    set volume(value) {
+        this.gainNode.gain.value = value;
+        this.emit('volumechange');
+    }
+    get muted() {
+        return this._muted;
+    }
+    set muted(value) {
+        if (this._muted === value)
+            return;
+        this._muted = value;
+        if (this._muted) {
+            this.gainNode.disconnect();
+        }
+        else {
+            this.gainNode.connect(this.audioContext.destination);
+        }
+    }
+    canPlayType(mimeType) {
+        return /^(audio|video)\//.test(mimeType);
+    }
+    /** Get the GainNode used to play the audio. Can be used to attach filters. */
+    getGainNode() {
+        return this.gainNode;
+    }
+    /** Get decoded audio */
+    getChannelData() {
+        const channels = [];
+        if (!this.buffer)
+            return channels;
+        const numChannels = this.buffer.numberOfChannels;
+        for (let i = 0; i < numChannels; i++) {
+            channels.push(this.buffer.getChannelData(i));
+        }
+        return channels;
+    }
+    /**
+     * Imitate `HTMLElement.removeAttribute` for compatibility with `Player`.
+     */
+    removeAttribute(attrName) {
+        switch (attrName) {
+            case 'src':
+                this.src = '';
+                break;
+            case 'playbackRate':
+                this.playbackRate = 0;
+                break;
+            case 'currentTime':
+                this.currentTime = 0;
+                break;
+            case 'duration':
+                this.duration = 0;
+                break;
+            case 'volume':
+                this.volume = 0;
+                break;
+            case 'muted':
+                this.muted = false;
+                break;
+        }
+    }
+}
+export default WebAudioPlayer;

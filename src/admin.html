@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Song — Admin</title>
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #222222;
+            color: #dbdbdb;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            padding: 16px 28px;
+            border-bottom: 1px solid #333;
+            font-size: 13px;
+            color: #888;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .workspace {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* ── LEFT PANEL ── */
+        .panel-form {
+            width: 420px;
+            flex-shrink: 0;
+            border-right: 1px solid #333;
+            overflow-y: auto;
+            padding: 28px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel-form h2 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #dbdbdb;
+            margin-bottom: 4px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.09em;
+            text-transform: uppercase;
+            color: #888;
+        }
+
+        label .req {
+            color: #cc4444;
+            margin-left: 2px;
+        }
+
+        input[type="text"],
+        input[type="file"],
+        textarea,
+        select {
+            background: #2c2c2c;
+            border: 1px solid #3a3a3a;
+            border-radius: 6px;
+            color: #dbdbdb;
+            font-size: 14px;
+            padding: 9px 12px;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.15s;
+            font-family: inherit;
+        }
+
+        input[type="file"] {
+            padding: 8px 10px;
+            cursor: pointer;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+            border-color: #555;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 32px;
+            cursor: pointer;
+        }
+
+        select option { background: #2c2c2c; }
+
+        /* rarity colour hints on select */
+        select.rarity-common   { color: #dbdbdb; }
+        select.rarity-uncommon { color: #0a9739; }
+        select.rarity-rare     { color: #007acc; }
+        select.rarity-legendary{ color: #ffd700; }
+
+        .info-box {
+            background: #292929;
+            border: 1px solid #3a3a3a;
+            border-radius: 6px;
+            padding: 12px 14px;
+            font-size: 12px;
+            line-height: 1.7;
+            color: #888;
+        }
+
+        .info-box span { font-weight: 600; }
+        .info-box .c-common    { color: #dbdbdb; }
+        .info-box .c-uncommon  { color: #0a9739; }
+        .info-box .c-rare      { color: #007acc; }
+        .info-box .c-legendary { color: #ffd700; }
+
+        .submit-btn {
+            margin-top: 4px;
+            padding: 11px;
+            background: #3a3a3a;
+            border: 1px solid #4a4a4a;
+            border-radius: 6px;
+            color: #dbdbdb;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+            width: 100%;
+            letter-spacing: 0.03em;
+        }
+
+        .submit-btn:hover { background: #444; border-color: #555; }
+        .submit-btn:active { background: #2e2e2e; }
+        .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        #status-msg {
+            font-size: 13px;
+            text-align: center;
+            min-height: 18px;
+            color: #888;
+        }
+
+        #status-msg.ok  { color: #0a9739; }
+        #status-msg.err { color: #cc4444; }
+
+        /* ── RIGHT PANEL ── */
+        .panel-preview {
+            flex: 1;
+            overflow-y: auto;
+            padding: 28px 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel-preview h2 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #dbdbdb;
+        }
+
+        .preview-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .preview-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.09em;
+            text-transform: uppercase;
+            color: #888;
+        }
+
+        audio {
+            width: 100%;
+            accent-color: #007acc;
+        }
+
+        /* Custom audio wrapper */
+        .audio-wrap {
+            background: #2c2c2c;
+            border: 1px solid #3a3a3a;
+            border-radius: 6px;
+            padding: 14px;
+        }
+
+        .audio-filename {
+            font-size: 12px;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        .ttml-preview {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 16px;
+            font-size: 13px;
+            line-height: 1.8;
+            color: #bbb;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-family: 'Consolas', 'Fira Code', monospace;
+            max-height: 480px;
+            overflow-y: auto;
+        }
+
+        .ttml-preview .ttml-line {
+            padding: 1px 0;
+        }
+
+        .ttml-preview .ttml-empty {
+            color: #444;
+            font-style: italic;
+        }
+
+        .no-preview {
+            color: #444;
+            font-size: 13px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+<header>Admin / Add Song</header>
+
+<div class="workspace">
+
+    <!-- ── FORM (LEFT) ── -->
+    <aside class="panel-form">
+        <h2>Song Details</h2>
+
+        <div class="field">
+            <label for="audio-file">Audio File <span class="req">*</span></label>
+            <input type="file" id="audio-file" accept="audio/*" required>
+        </div>
+
+        <div class="field">
+            <label for="ttml-file">TTML File</label>
+            <input type="file" id="ttml-file" accept=".ttml,.xml">
+        </div>
+
+        <div class="field">
+            <label for="title">Title <span class="req">*</span></label>
+            <input type="text" id="title" placeholder="Song title" required>
+        </div>
+
+        <div class="field">
+            <label for="description">Description</label>
+            <textarea id="description" placeholder="Optional description…"></textarea>
+        </div>
+
+        <div class="field">
+            <label for="rarity">Rarity <span class="req">*</span></label>
+            <select id="rarity" required>
+                <option value="" disabled selected>— select rarity —</option>
+                <option value="common">Common</option>
+                <option value="uncommon">Uncommon</option>
+                <option value="rare">Rare</option>
+                <option value="legendary">Legendary</option>
+            </select>
+        </div>
+
+        <div class="info-box">
+            <span class="c-common">Common</span> — Released music.<br>
+            <span class="c-uncommon">Uncommon</span> — Unheard versions of released music.<br>
+            <span class="c-rare">Rare</span> — Taken down music.<br>
+            <span class="c-legendary">Legendary</span> — Unreleased music.
+        </div>
+
+        <button class="submit-btn" id="submit-btn" type="button">Upload Song</button>
+        <div id="status-msg"></div>
+    </aside>
+
+    <!-- ── PREVIEW (RIGHT) ── -->
+    <main class="panel-preview">
+        <h2>Preview</h2>
+
+        <div class="preview-section">
+            <div class="preview-label">Audio</div>
+            <div class="audio-wrap" id="audio-wrap">
+                <audio id="audio-player" controls style="display:none;"></audio>
+                <p class="no-preview" id="audio-placeholder">No audio file selected.</p>
+                <div class="audio-filename" id="audio-filename"></div>
+            </div>
+        </div>
+
+        <div class="preview-section">
+            <div class="preview-label">TTML Lyrics</div>
+            <div class="ttml-preview" id="ttml-preview">
+                <span class="ttml-empty">No TTML file selected.</span>
+            </div>
+        </div>
+    </main>
+
+</div>
+
+<script>
+    const audioInput    = document.getElementById('audio-file');
+    const ttmlInput     = document.getElementById('ttml-file');
+    const raritySelect  = document.getElementById('rarity');
+    const submitBtn     = document.getElementById('submit-btn');
+    const statusMsg     = document.getElementById('status-msg');
+
+    const audioPlayer      = document.getElementById('audio-player');
+    const audioPlaceholder = document.getElementById('audio-placeholder');
+    const audioFilename    = document.getElementById('audio-filename');
+    const ttmlPreview      = document.getElementById('ttml-preview');
+
+    // ── Rarity colour on select ──
+    raritySelect.addEventListener('change', () => {
+        raritySelect.className = `rarity-${raritySelect.value}`;
+    });
+
+    // ── Audio preview ──
+    audioInput.addEventListener('change', () => {
+        const file = audioInput.files[0];
+        if (!file) {
+            audioPlayer.style.display = 'none';
+            audioPlaceholder.style.display = '';
+            audioFilename.textContent = '';
+            return;
+        }
+        const url = URL.createObjectURL(file);
+        audioPlayer.src = url;
+        audioPlayer.style.display = 'block';
+        audioPlaceholder.style.display = 'none';
+        audioFilename.textContent = file.name;
+    });
+
+    // ── TTML preview ──
+    ttmlInput.addEventListener('change', () => {
+        const file = ttmlInput.files[0];
+        if (!file) {
+            ttmlPreview.innerHTML = '<span class="ttml-empty">No TTML file selected.</span>';
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const raw = e.target.result;
+            renderTtmlPreview(raw);
+        };
+        reader.readAsText(file);
+    });
+
+    function renderTtmlPreview(xmlString) {
+        // Extract lyric lines from TTML <p> or <span> elements, show them cleanly
+        try {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(xmlString, 'application/xml');
+            const parseError = doc.querySelector('parsererror');
+
+            if (parseError) {
+                // Show raw XML if it can't be parsed
+                ttmlPreview.textContent = xmlString;
+                return;
+            }
+
+            // Pull all <p> text contents as lyric lines
+            const paragraphs = doc.querySelectorAll('p');
+            if (paragraphs.length === 0) {
+                // Fallback: show formatted XML
+                ttmlPreview.textContent = formatXml(xmlString);
+                return;
+            }
+
+            ttmlPreview.innerHTML = '';
+            paragraphs.forEach(p => {
+                const begin = p.getAttribute('begin') || '';
+                const end   = p.getAttribute('end')   || '';
+                const text  = p.textContent.replace(/\s+/g, ' ').trim();
+
+                const line = document.createElement('div');
+                line.className = 'ttml-line';
+
+                const time = document.createElement('span');
+                time.style.cssText = 'color:#555;font-size:11px;margin-right:10px;user-select:none;';
+                time.textContent = begin ? `${begin}` : '';
+
+                const lyric = document.createElement('span');
+                lyric.textContent = text || '(empty)';
+                if (!text) lyric.style.color = '#444';
+
+                line.appendChild(time);
+                line.appendChild(lyric);
+                ttmlPreview.appendChild(line);
+            });
+        } catch {
+            ttmlPreview.textContent = xmlString;
+        }
+    }
+
+    function formatXml(xml) {
+        let indent = 0;
+        return xml
+            .replace(/>\s*</g, '>\n<')
+            .split('\n')
+            .map(line => {
+                if (line.match(/^<\/\w/)) indent = Math.max(0, indent - 1);
+                const result = '  '.repeat(indent) + line.trim();
+                if (line.match(/^<\w[^>]*[^/]>.*$/) && !line.match(/<.*>.*<.*>/)) indent++;
+                return result;
+            })
+            .join('\n');
+    }
+
+    // ── Submit ──
+    submitBtn.addEventListener('click', async () => {
+        statusMsg.className = '';
+        statusMsg.textContent = '';
+
+        const audioFile = audioInput.files[0];
+        const ttmlFile  = ttmlInput.files[0];
+        const title       = document.getElementById('title').value.trim();
+        const description = document.getElementById('description').value.trim();
+        const rarity      = raritySelect.value;
+
+        if (!audioFile) { return setStatus('Audio file is required.', 'err'); }
+        if (!title)     { return setStatus('Title is required.', 'err'); }
+        if (!rarity)    { return setStatus('Rarity is required.', 'err'); }
+
+        const formData = new FormData();
+        formData.append('audio', audioFile);
+        if (ttmlFile) formData.append('ttml', ttmlFile);
+        formData.append('title', title);
+        formData.append('description', description);
+        formData.append('rarity', rarity);
+
+        submitBtn.disabled = true;
+        setStatus('Uploading…', '');
+
+        try {
+            const res = await fetch('/api/postSong', {
+                method: 'POST',
+                body: formData,
+            });
+            if (res.ok) {
+                setStatus('Song added successfully!', 'ok');
+                // Reset form
+                audioInput.value = '';
+                ttmlInput.value = '';
+                document.getElementById('title').value = '';
+                document.getElementById('description').value = '';
+                raritySelect.value = '';
+                raritySelect.className = '';
+                audioPlayer.style.display = 'none';
+                audioPlaceholder.style.display = '';
+                audioFilename.textContent = '';
+                ttmlPreview.innerHTML = '<span class="ttml-empty">No TTML file selected.</span>';
+            } else {
+                const body = await res.json().catch(() => ({}));
+                setStatus(`Error ${res.status}: ${body.error || res.statusText}`, 'err');
+            }
+        } catch (err) {
+            setStatus(`Network error: ${err.message}`, 'err');
+        } finally {
+            submitBtn.disabled = false;
+        }
+    });
+
+    function setStatus(msg, cls) {
+        statusMsg.textContent = msg;
+        statusMsg.className = cls;
+    }
+</script>
+
+</body>
+</html>

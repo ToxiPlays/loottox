@@ -1,0 +1,223 @@
+import WebAudioPlayer from '../webaudio.js';
+// Mock Web Audio API
+function createMockAudioContext() {
+    let _currentTime = 0;
+    const gainNode = {
+        gain: { value: 1 },
+        connect: jest.fn(),
+        disconnect: jest.fn(),
+    };
+    let bufferSourceOnended = null;
+    const bufferSource = {
+        buffer: null,
+        playbackRate: { value: 1 },
+        connect: jest.fn(),
+        disconnect: jest.fn(),
+        start: jest.fn(),
+        stop: jest.fn(),
+        addEventListener: jest.fn(),
+        get onended() {
+            return bufferSourceOnended;
+        },
+        set onended(fn) {
+            bufferSourceOnended = fn;
+        },
+    };
+    const audioContext = {
+        get currentTime() {
+            return _currentTime;
+        },
+        set currentTime(v) {
+            _currentTime = v;
+        },
+        sampleRate: 44100,
+        destination: {},
+        createGain: jest.fn(() => gainNode),
+        createBufferSource: jest.fn(() => bufferSource),
+        decodeAudioData: jest.fn(),
+    };
+    return {
+        audioContext,
+        gainNode,
+        bufferSource,
+        triggerOnended: () => {
+            if (bufferSourceOnended)
+                bufferSourceOnended();
+        },
+    };
+}
+function createMockBuffer(duration) {
+    return { duration, numberOfChannels: 1, getChannelData: jest.fn(() => new Float32Array(0)) };
+}
+describe('WebAudioPlayer', () => {
+    describe('audio session playback mode', () => {
+        const originalAudioSession = Object.getOwnPropertyDescriptor(navigator, 'audioSession');
+        afterEach(() => {
+            if (originalAudioSession) {
+                Object.defineProperty(navigator, 'audioSession', originalAudioSession);
+            }
+            else {
+                delete navigator.audioSession;
+            }
+            jest.restoreAllMocks();
+        });
+        test('sets navigator.audioSession.type to playback when available', () => {
+            const { audioContext } = createMockAudioContext();
+            const audioSession = { type: 'ambient' };
+            Object.defineProperty(navigator, 'audioSession', { configurable: true, value: audioSession });
+            new WebAudioPlayer(audioContext);
+            expect(audioSession.type).toBe('playback');
+        });
+        test('warns when setting navigator.audioSession.type fails', () => {
+            const { audioContext } = createMockAudioContext();
+            const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+            const audioSession = {
+                get type() {
+                    return 'ambient';
+                },
+                set type(_value) {
+                    throw new Error('nope');
+                },
+            };
+            Object.defineProperty(navigator, 'audioSession', { configurable: true, value: audioSession });
+            new WebAudioPlayer(audioContext);
+            expect(warnSpy).toHaveBeenCalledWith('Setting navigator.audioSession.type failed:', expect.objectContaining({ message: 'nope' }));
+        });
+    });
+    describe('onended and finish event', () => {
+        test('emits ended when buffer finishes naturally at duration', () => {
+            const { audioContext, triggerOnended } = createMockAudioContext();
+            const player = new WebAudioPlayer(audioContext);
+            const endedSpy = jest.fn();
+            player.on('ended', endedSpy);
+            player.buffer = createMockBuffer(10);
+            // Play
+            audioContext.currentTime = 100;
+            player.play();
+            // Simulate natural end: audioContext.currentTime has advanced by exactly the duration
+            audioContext.currentTime = 110; // 100 + 10 seconds of audio
+            triggerOnended();
+            expect(endedSpy).toHaveBeenCalledTimes(1);
+        });
+        test('emits ended when buffer finishes naturally and currentTime is slightly less than duration due to float precision', () => {
+            const { audioContext, triggerOnended } = createMockAudioContext();
+            const player = new WebAudioPlayer(audioContext);
+            const endedSpy = jest.fn();
+            player.on('ended', endedSpy);
+            player.buffer = createMockBuffer(10);
+            // Play
+            audioContext.currentTime = 100;
+            player.play();
+            // Simulate natural end with slight floating-point imprecision
+            // currentTime would be 0 + (109.999 - 100) * 1 = 9.999, which is < 10 (duration)
+            audioContext.currentTime = 109.999;
+            triggerOnended();
+            expect(endedSpy).toHaveBeenCalledTimes(1);
+        });
+        test('does not emit ended when paused programmatically (far from end)', () => {
+            const { audioContext, triggerOnended } = createMockAudioContext();
+            const player = new WebAudioPlayer(audioContext);
+            const endedSpy = jest.fn();
+            player.on('ended', endedSpy);
+            player.buffer = createMockBuffer(10);
+            // Play
+            audioContext.currentTime = 100;
+            player.play();
+            // Advance to mid-playback
+            audioContext.currentTime = 105;
+            // User pauses (sets this.paused = true synchronously)
+            player.pause();
+            // onended fires asynchronously after stop()
+            triggerOnended();
+            expect(endedSpy).not.toHaveBeenCalled();
+        });
+        test('does not emit ended when stopAt stops before end of audio', () => {
+            const { audioContext, triggerOnended } = createMockAudioContext();
+            const player = new WebAudioPlayer(audioContext);
+            const endedSpy = jest.fn();
+            player.on('ended', endedSpy);
+            player.buffer = createMockBuffer(10);
+            // Play
+            audioContext.currentTime = 100;
+            player.play();
+            // Stop at 5 seconds
+            audioContext.currentTime = 100;
+            player.stopAt(5);
+            // Simulate buffer stopping at 5 seconds
+            audioContext.currentTime = 105;
+            triggerOnended();
+            // Should NOT emit ended because currentTime (5) is far from duration (10)
+            expect(endedSpy).not.toHaveBeenCalled();
+        });
+        test('emits ended when currentTime slightly exceeds duration', () => {
+            const { audioContext, triggerOnended } = createMockAudioContext();
+            const player = new WebAudioPlayer(audioContext);
+            const endedSpy = jest.fn();
+            player.on('ended', endedSpy);
+            player.buffer = createMockBuffer(10);
+            // Play
+            audioContext.currentTime = 100;
+            player.play();
+            // Simulate natural end: audioContext has advanced slightly past the duration
+            audioContext.currentTime = 110.005;
+            triggerOnended();
+            expect(endedSpy).toHaveBeenCalledTimes(1);
+        });
+        test('emits ended with non-default playback rate', () => {
+            const { audioContext, triggerOnended } = createMockAudioContext();
+            const player = new WebAudioPlayer(audioContext);
+            const endedSpy = jest.fn();
+            player.on('ended', endedSpy);
+            player.buffer = createMockBuffer(10);
+            player._playbackRate = 2;
+            // Play
+            audioContext.currentTime = 100;
+            player.play();
+            // At 2x, 10s audio takes 5s real time
+            // currentTime = 0 + (104.999 - 100) * 2 = 9.998, which is < 10 but within tolerance
+            audioContext.currentTime = 104.999;
+            triggerOnended();
+            expect(endedSpy).toHaveBeenCalledTimes(1);
+        });
+        test('stopAt schedules the stop scaled by playback rate', () => {
+            const { audioContext, bufferSource } = createMockAudioContext();
+            const player = new WebAudioPlayer(audioContext);
+            player.buffer = createMockBuffer(10);
+            player._playbackRate = 2;
+            audioContext.currentTime = 100;
+            player.play();
+            // At 2x rate, stopping at media time 5 takes only 2.5s of real time
+            player.stopAt(5);
+            expect(bufferSource.stop).toHaveBeenCalledWith(102.5);
+        });
+        test('stopAt reports exactly the stop position after the buffer ends', () => {
+            var _a;
+            const { audioContext, bufferSource } = createMockAudioContext();
+            const player = new WebAudioPlayer(audioContext);
+            player.buffer = createMockBuffer(10);
+            audioContext.currentTime = 100;
+            player.play();
+            player.stopAt(5);
+            // The 'ended' event fires with some latency after the actual stop
+            audioContext.currentTime = 105.03;
+            const endedListener = (_a = bufferSource.addEventListener.mock.calls.find(([type]) => type === 'ended')) === null || _a === void 0 ? void 0 : _a[1];
+            endedListener === null || endedListener === void 0 ? void 0 : endedListener();
+            expect(player.currentTime).toBe(5);
+        });
+        test('does not emit ended when currentTime is beyond tolerance threshold from duration', () => {
+            const { audioContext, triggerOnended } = createMockAudioContext();
+            const player = new WebAudioPlayer(audioContext);
+            const endedSpy = jest.fn();
+            player.on('ended', endedSpy);
+            player.buffer = createMockBuffer(10);
+            // Play
+            audioContext.currentTime = 100;
+            player.play();
+            // Simulate stopAt scenario where currentTime is 0.02s before duration (beyond 0.01s tolerance)
+            // currentTime = 0 + (109.98 - 100) * 1 = 9.98, duration - currentTime = 0.02 >= 0.01
+            audioContext.currentTime = 109.98;
+            triggerOnended();
+            expect(endedSpy).not.toHaveBeenCalled();
+        });
+    });
+});

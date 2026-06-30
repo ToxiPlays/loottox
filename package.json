@@ -1,0 +1,18 @@
+{
+  "name": "loottox",
+  "version": "1.0.0",
+  "description": "ToxiPlays discography gambling lol",
+  "license": "ISC",
+  "author": "toxi",
+  "type": "commonjs",
+  "main": "app.mjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "express": "^5.2.1",
+    "multer": "^2.2.0",
+    "wavesurfer.js": "^7.12.8"
+  }
+}

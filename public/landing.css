@@ -1,0 +1,91 @@
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 2%;
+    color: #ffffff;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navigation a {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 16px;
+  transition: color 0.3s ease;
+}
+
+nav.navigation a {
+    margin-left: 10dvh;
+}
+
+.navigation a:hover {
+  color: #00adb5;
+}
+
+h2 {
+    margin-bottom: 0.2em;
+}
+
+/* From Uiverse.io by SujitAdroja */ 
+.btn {
+  color: rgb(255, 255, 255);
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 2px solid rgb(255, 255, 255);
+  padding: 10px 20px;
+  font-size: 17px;
+  cursor: pointer;
+  font-weight: bold;
+  background: transparent;
+  position: relative;
+  transition: all 1s;
+  overflow: hidden;
+}
+
+.btn:hover {
+  color: rgb(144, 211, 255);
+}
+
+.btn::before {
+  content: "";
+  position: absolute;
+  height: 100%;
+  width: 0%;
+  top: 0;
+  left: -40px;
+  transform: skewX(45deg);
+  background-color: rgb(255, 255, 255);
+  z-index: -1;
+  transition: all 1s;
+}
+
+.btn:hover::before {
+  width: 160%;
+}
+
+main > p {
+    text-align: center;
+    margin: 2%;
+    margin-right: 10%;
+    margin-left: 10%;
+}
+
+main {
+    font-size: large;
+}
+
+table {
+    width: 80%;
+    margin-left: -3%;
+    text-align: center;
+}
+
+td { 
+    padding: 1%;
+}
+
+th {
+    font-size: x-large;
+}

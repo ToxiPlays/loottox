@@ -1,0 +1,138 @@
+/* ─── TTML Lyric Renderer ─────────────────────────────────────────────────── */
+
+.ttml-container {
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 100%;
+    scroll-behavior: smooth;
+    width: 100% !important;
+    &::-webkit-scrollbar {
+        display: none;
+    }
+    scrollbar-width: none;
+    -ms-overflow-style: none; 
+}
+
+.ttml-scroller {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1em;
+    padding: 1em 0.5em;
+    /* top/bottom padding so the active line can centre-scroll */
+    padding-top: 50%;
+    padding-bottom: 50%;
+    width: 70% !important;
+}
+
+/* ─── Individual line ─────────────────────────────────────────────────────── */
+
+.ttml-line {
+    font-size: 1.5rem;
+    line-height: 1.5;
+    color: #888;
+    width: 85% !important;
+    transition: color var(--active-dur, 0.5s) ease,
+                font-weight var(--active-dur, 0.5s) ease,
+                opacity var(--active-dur, 1s) ease;
+    will-change: color;
+    align-items: left;
+    /* Default sweep colour for v1 (overridden inline for v2) */
+    --sweep-color: #2f98ee;
+}
+
+.ttml-line.ttml-active {
+    font-weight: bold;
+    color: #ccc;
+}
+
+.ttml-line.ttml-past {
+    color: #555;
+    opacity: 0;
+}
+
+.ttml-scroller:hover > .ttml-line.ttml-past {
+    opacity: 0.5;
+}
+
+/* ─── v2 agent — right-aligned, orange sweep ─────────────────────────────── */
+
+.ttml-line--v2 {
+    text-align: right;
+    align-items: right;
+    --sweep-color: #ef7010;
+}
+
+/* ─── Main lyric row ──────────────────────────────────────────────────────── */
+
+.ttml-main-row {
+    display: inline;
+}
+
+/* ─── Per-span colour sweep ───────────────────────────────────────────────── */
+/*
+   --sweep-color is set per-line (v1 = #2f98ee, v2 = #ef7010).
+   --sweep-pct is driven by JS each RAF tick.
+*/
+
+.ttml-token {
+    display: inline;
+    background: linear-gradient(
+        to right,
+        var(--sweep-color) 0%,
+        var(--sweep-color) var(--sweep-pct, 0%),
+        currentColor var(--sweep-pct, 0%)
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+}
+
+/* ─── Ad-lib row ──────────────────────────────────────────────────────────── */
+
+.ttml-adlib-row {
+    display: block;
+    font-size: 0.78em;
+    /* Inherit line color so .ttml-token's currentColor resolves correctly.
+       Muted via opacity so the sweep gradient still works against it. */
+    color: inherit;
+    opacity: 0.6;
+    margin-top: 0.15em;
+    width: 100% !important;
+    transition: all 0.5s ease-in-out;
+    /* Inherits text-align from parent .ttml-line, so v2 adlibs right-align too */
+}
+
+.ttml-adlib-hidden {
+    opacity: 0 !important;
+}
+
+/* ─── Gap / interstitial line ─────────────────────────────────────────────── */
+
+.ttml-gap-line {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4em;
+    color: #666;
+}
+
+.ttml-gap-label {
+    font-size: 0.85em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #666;
+}
+
+.ttml-gap-bar {
+    height: 2px;
+    border-radius: 1px;
+    background: linear-gradient(
+        to right,
+        #2f98ee 0%,
+        #2f98ee var(--gap-pct, 0%),
+        #333 var(--gap-pct, 0%)
+    );
+    width: 100%;
+}
