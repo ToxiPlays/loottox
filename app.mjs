@@ -230,9 +230,8 @@ app.get('/buy/ultra', (req, res) => {
     if (transactionId) {
         res.redirect('/');
     } else {
-        res.redirect('https://buy.stripe.com/fZudR96o72qd2ty8Ql4ow00');
+        res.redirect('https://buy.stripe.com/aFa28rcMvc0N8RW9Up4ow01');
     }
-    res.send('https://buy.stripe.com/aFa28rcMvc0N8RW9Up4ow01');
 });
 
 app.get('/api/get-basic-transaction/', (req, res) => {
