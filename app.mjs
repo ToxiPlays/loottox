@@ -525,5 +525,3 @@ app.listen(port, () => {
 
 app.use(express.static('public'));
 app.use('/vendor/wavesurfer', express.static('./node_modules/wavesurfer.js/dist'));
-
-module.exports = app; 
