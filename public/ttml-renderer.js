@@ -219,7 +219,7 @@ export function mountTTMLRenderer(container, lines, wavesurfer) {
         const gapStart = i === 0 ? 0 : lines[i - 1].end;
         const gapEnd   = lines[i].begin;
         if (gapEnd - gapStart > GAP_THRESHOLD) {
-            const label = i === 0 ? 'Intro' : 'Instrumental Break';
+            const label = i === 0 ? 'Intro' : '♪♪♪';
             gaps.push({ begin: gapStart, end: gapEnd, label, afterIdx: i - 1 });
         }
     }

@@ -189,7 +189,7 @@ callInternalApi('metadata/' + transactionId, 'GET').then(data => {
             songTitle.textContent = song.title;
             songTitle.classList.add(song.rarity);
             const songDescription = songRow.querySelector('p');
-            songDescription.innerHTML = song.description.replaceAll("\n","<br>").replaceAll(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="loottox-extra" class="body-link">$1</a>');
+            songDescription.innerHTML = song.description.replaceAll("\r\n","<br>").replaceAll(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="loottox-extra" class="body-link">$1</a>');
         });
     } else {
         alert(`Error fetching metadata: ${data.error}`);

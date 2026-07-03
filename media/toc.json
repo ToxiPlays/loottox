@@ -1,1 +1,74 @@
-[]
+[
+    {
+        "title": "Millionaire (OG)",
+        "description": "Featuring vocals from october and Kid Wcked. Different first verse. Cool!",
+        "rarity": "uncommon",
+        "src": "millionaire old ver.wav"
+    },
+    {
+        "title": "Heartthrob",
+        "description": "Exported Sep 28, 2024.\r\nIn an alternative universe not too dissimilar from our own, Puppet's \"Heartthrob\" would've been the single for the ill-fated <i>Level Select</i> sequel. It just narrowly got beat out by [Cyrus's \"Order in the Court\"](https://www.youtube.com/watch?v=XKrvwmkJiw0).\r\n\r\nIf you don't know what that means, probably best to ignore it.",
+        "rarity": "legendary",
+        "src": "_heartthrob.mp3"
+    },
+    {
+        "title": "sip for you",
+        "description": "Ya know, like from <i>PINK IS BETTER</i>?\r\nExported March 27, 2025, released to [SoundCloud](https://soundcloud.com/toxiplays) during film class, deleted shortly after.",
+        "rarity": "rare",
+        "src": "sip_4_u.mp3"
+    },
+    {
+        "title": "the jig is beautiful",
+        "description": "Our bones really are just artifacts ultimately, huh?\r\nOriginally exported April 6, 2025. Uploaded to [cology](https://soundcloud.com/cology) before being taken down. Remastered for Loottox.",
+        "rarity": "rare",
+        "src": "the_jig_is_beautiful.mp3"
+    },
+    {
+        "title": "shots in the air",
+        "description": "w non-canon loosie\r\nAvailable [exclusively on SoundCloud](https://soundcloud.com/toxiplays/shots-in-the-air). Released June 23, 2026.",
+        "rarity": "common",
+        "src": "shots_in_the_air_prod_skitzo_ranger.mp3"
+    },
+    {
+        "title": "Soñé Contigo",
+        "description": "una balada electrónica lenta que cuenta con las voces relajantes de la cantante de reggaetón Ashesndreams y la producción de ToxiPlays. Like that bio? brae liam wrote it!!!\r\n\r\nReleased Jan 17, 2023 to [YouTube](https://www.youtube.com/watch?v=dJgtmXrlg0s) and [SoundCloud](https://soundcloud.com/toxiplays/sone-contigo).",
+        "rarity": "common",
+        "src": "sone contigo.mp3"
+    },
+    {
+        "title": "Ghost Town (Stripped)",
+        "description": "A drumless more spacy version of the country-pop single [\"Ghost Town\"](https://www.youtube.com/watch?v=qBMb374YomM), which originally released on March 19, 2026 to [YouTube](https://www.youtube.com/watch?v=qBMb374YomM) and [SoundCloud](https://soundcloud.com/toxiplays/ghost-town).",
+        "rarity": "uncommon",
+        "src": "ghost_town_stripped.mp3"
+    },
+    {
+        "title": "THREE HOMICIDES",
+        "description": "Featuring vocals from aurainairy and, well, *some* vocals from jun AKA songoat. It's very slightly unfinished but mostly there!\r\n\r\nDid you also know that it's a perfect loop?",
+        "rarity": "legendary",
+        "src": "three_homicides_demo_comp.mp3"
+    },
+    {
+        "title": "wordle freestyle",
+        "description": "Unchained freestyle released everywhere on June 5, 2026 to raise hype for the then-upcoming mixtape, THE WORLD IS YOURS. YouTube has a [lyric video](https://www.youtube.com/watch?v=qV4Co7C0PMo).\r\n\r\nMy greatest thanks to [Kyeler](https://genius.com/Kyeler) for providing the sync live on [Spicy Lyrics](https://spicylyrics.org). That's what you see to your right. I was NOT resyncing this from scratch.",
+        "rarity": "common",
+        "src": "wordle_freestyle.mp3"
+    },
+    {
+        "title": "Splendid (Remix)",
+        "description": "This was supposed to be released as an Instagram Reel or a TikTok or something but that just never happened 😭",
+        "rarity": "uncommon",
+        "src": "splendid_remix.mp3"
+    },
+    {
+        "title": "PUMP THE BASS (OG)",
+        "description": "The original demo for the ToxiPlays verse featured on Mutant Boy & Solo's [\"POP OUT // PUMP THE BASS\"](https://www.youtube.com/watch?v=8ziAzfdHpMo), pre-beat switch and additional prod. and all.\r\n\r\nFun fact: The intended direction for this verse that Mutant Boy gave me was, and I quote, \"bragging about how good you are. technically glazing urself\"",
+        "rarity": "uncommon",
+        "src": "self_glaze_4_mutant_boy.mp3"
+    },
+    {
+        "title": "STILL STANDING (AU)",
+        "description": "The original demo of \"STILL STANDING\" from June 18 2026 was based on [\"All Day\"](https://genius.com/Kanye-west-all-day-lyrics). Here's how it'd sound in an alternate universe where it still was!\r\n\r\nFun fact while I have you: \"They want you dead\" is the hook lyric because [these guys](https://www.youtube.com/watch?v=BcOdrWxiatA) mistranscribed the actual hook lyric, \"So won't you dance?\"",
+        "rarity": "uncommon",
+        "src": "still_standing_au.mp3"
+    }
+]
