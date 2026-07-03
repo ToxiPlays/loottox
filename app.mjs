@@ -519,9 +519,13 @@ app.post('/api/postSong', upload.fields([
     }
 });
 
-app.listen(port, () => {
-  console.log(`Listening on port ${port}`);
-});
-
 app.use(express.static('public'));
 app.use('/vendor/wavesurfer', express.static('./node_modules/wavesurfer.js/dist'));
+
+if (!process.env.VERCEL) {
+  app.listen(port, () => {
+    console.log(`Listening on port ${port}`);
+  });
+}
+
+export default app;
