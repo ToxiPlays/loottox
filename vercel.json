@@ -11,5 +11,10 @@
       "src": "/(.*)",
       "dest": "app.mjs"
     }
-  ]
+  ],
+  "functions": {
+    "app.mjs": {
+      "includeFiles": ["src/**", "media/**"]
+    }
+  }
 }
