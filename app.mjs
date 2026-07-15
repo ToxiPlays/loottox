@@ -182,6 +182,8 @@ const app = express();
 app.use(cookieParser());
 const port = 3000;
 
+app.set('trust proxy', 1); 
+
 app.get('/', (req, res) => {
   const transactionId = req.cookies.transactionId;
   if (transactionId) {
@@ -238,7 +240,8 @@ app.get('/api/get-basic-transaction/', (req, res) => {
     function findInMap(map, prop, targetValue) {
         for (const [key, item] of map.entries()) {
             if (item && item[prop] === targetValue) {
-                return { key, item };
+                const notExpired = new Date(item.expiresAt) > new Date();
+                if (notExpired) return { key, item };
             }
         }
         return null;
