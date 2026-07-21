@@ -42,12 +42,12 @@ gradient.addColorStop((canvas.height * 0.7 + 3) / canvas.height, '#B1B1B1') // B
 gradient.addColorStop(1, '#B1B1B1') // Bottom color
 
 const progressGradient = ctx.createLinearGradient(0, 0, 0, canvas.height * 1.35)
-progressGradient.addColorStop(0, '#2f98ee') // Top color
-progressGradient.addColorStop((canvas.height * 0.7) / canvas.height, '#2f98ee') // Top color
+progressGradient.addColorStop(0, '#ff607a') // Top color
+progressGradient.addColorStop((canvas.height * 0.7) / canvas.height, '#ff607a') // Top color
 progressGradient.addColorStop((canvas.height * 0.7 + 1) / canvas.height, '#ffffff') // White line
 progressGradient.addColorStop((canvas.height * 0.7 + 2) / canvas.height, '#ffffff') // White line
-progressGradient.addColorStop((canvas.height * 0.7 + 3) / canvas.height, '#94caf6') // Bottom color
-progressGradient.addColorStop(1, '#94c7f6') // Bottom color
+progressGradient.addColorStop((canvas.height * 0.7 + 3) / canvas.height, '#ffaebc') // Bottom color
+progressGradient.addColorStop(1, '#ffaebc') // Bottom color
 
 const RARITIES = ['common', 'uncommon', 'rare', 'legendary'];
 

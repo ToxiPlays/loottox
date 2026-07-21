@@ -174,7 +174,7 @@ export function mountTTMLRenderer(container, lines, wavesurfer) {
         el.className = 'ttml-line';
         if (line.agent === 'v2') {
             el.classList.add('ttml-line--v2');
-            el.style.setProperty('--sweep-color', '#ef7010');
+            el.style.setProperty('--sweep-color', '#6477c4');
         }
 
         // Main row

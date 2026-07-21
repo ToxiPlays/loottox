@@ -1,12 +1,28 @@
 @import url('https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400..700;1,400..700&display=swap');
 
+@font-face {
+    font-family: "Be Vietnam Pro";
+    font-style: normal;
+    font-weight: 400;
+    font-display: fallback;
+    src: url(/fonts/viet.woff2) format('woff2');
+}
+
+@font-face {
+    font-family: "Bitcount Grid Single";
+    font-style: normal;
+    font-weight: 400;
+    font-display: fallback;
+    src: url(/fonts/bitcount.woff2) format('woff2');
+}
+
 * {
-    background-color: #222222;
+    background-color: #0f0404;
     --common: #dbdbdb;
     --uncommon: #0a9739;
     --rare: #007acc;
     --legendary: #ffd700;
-    font-family: "Arimo", sans-serif;
+    font-family: "Be Vietnam Pro", "Arimo", sans-serif;
     font-optical-sizing: auto;
     font-style: normal;
 }
@@ -175,7 +191,7 @@ main {
 }
 
 .body-link {
-    color: #2f98ee;
+    color: #ff607a;
     text-decoration: none;
     transition: all 0.2s ease-in-out;
 }
@@ -208,7 +224,7 @@ main {
   border: none;
   color: #fff;
   cursor: pointer;
-  background-color: #7d2ae8;
+  background-color: #ff607a;
   transition: all 0.2s ease;
 }
 
@@ -230,15 +246,15 @@ main {
 
 .download-btn:hover:before {
   top: -70%;
-  background-image: radial-gradient(circle, #7d2ae8 20%, transparent 20%),
-    radial-gradient(circle, transparent 20%, #7d2ae8 20%, transparent 30%),
-    radial-gradient(circle, #7d2ae8 20%, transparent 20%),
-    radial-gradient(circle, #7d2ae8 20%, transparent 20%),
-    radial-gradient(circle, transparent 10%, #7d2ae8 15%, transparent 20%),
-    radial-gradient(circle, #7d2ae8 20%, transparent 20%),
-    radial-gradient(circle, #7d2ae8 20%, transparent 20%),
-    radial-gradient(circle, #7d2ae8 20%, transparent 20%),
-    radial-gradient(circle, #7d2ae8 20%, transparent 20%);
+  background-image: radial-gradient(circle, #ff607a 20%, transparent 20%),
+    radial-gradient(circle, transparent 20%, #ff607a 20%, transparent 30%),
+    radial-gradient(circle, #ff607a 20%, transparent 20%),
+    radial-gradient(circle, #ff607a 20%, transparent 20%),
+    radial-gradient(circle, transparent 10%, #ff607a 15%, transparent 20%),
+    radial-gradient(circle, #ff607a 20%, transparent 20%),
+    radial-gradient(circle, #ff607a 20%, transparent 20%),
+    radial-gradient(circle, #ff607a 20%, transparent 20%),
+    radial-gradient(circle, #ff607a 20%, transparent 20%);
   background-size: 10% 10%, 20% 20%, 15% 15%, 20% 20%, 18% 18%, 10% 10%, 15% 15%,
     10% 10%, 18% 18%;
   background-position: 50% 120%;
@@ -265,13 +281,13 @@ main {
 
 .download-btn:hover::after {
   bottom: -70%;
-  background-image: radial-gradient(circle, #7d2ae8 20%, transparent 20%),
-    radial-gradient(circle, #7d2ae8 20%, transparent 20%),
-    radial-gradient(circle, transparent 10%, #7d2ae8 15%, transparent 20%),
-    radial-gradient(circle, #7d2ae8 20%, transparent 20%),
-    radial-gradient(circle, #7d2ae8 20%, transparent 20%),
-    radial-gradient(circle, #7d2ae8 20%, transparent 20%),
-    radial-gradient(circle, #7d2ae8 20%, transparent 20%);
+  background-image: radial-gradient(circle, #ff607a 20%, transparent 20%),
+    radial-gradient(circle, #ff607a 20%, transparent 20%),
+    radial-gradient(circle, transparent 10%, #ff607a 15%, transparent 20%),
+    radial-gradient(circle, #ff607a 20%, transparent 20%),
+    radial-gradient(circle, #ff607a 20%, transparent 20%),
+    radial-gradient(circle, #ff607a 20%, transparent 20%),
+    radial-gradient(circle, #ff607a 20%, transparent 20%);
   background-size: 15% 15%, 20% 20%, 18% 18%, 20% 20%, 15% 15%, 20% 20%, 18% 18%;
   background-position: 50% 0%;
   animation: greenbottomBubbles 0.6s ease;

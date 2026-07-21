@@ -9,6 +9,15 @@ header {
     z-index: 1000;
 }
 
+header > h1,
+header > h1 > span {
+  font-family: 'Bitcount Grid Single';
+}
+
+.muted {
+  opacity: 50%;
+}
+
 .navigation a {
   color: #ffffff;
   text-decoration: none;
@@ -21,7 +30,7 @@ nav.navigation a {
 }
 
 .navigation a:hover {
-  color: #00adb5;
+  color: #ff607a;
 }
 
 h2 {
@@ -45,7 +54,7 @@ h2 {
 }
 
 .btn:hover {
-  color: rgb(144, 211, 255);
+  color: #ff607a;
 }
 
 .btn::before {
