@@ -88,5 +88,23 @@
         "description": "I posted the [Lyricify syllable sync](https://x.com/toximixs/status/1991633009947430919?s=20) for this on Twitter and that's about it. But hey, the composer really liked it ^_^",
         "rarity": "common",
         "src": "this_is_not_a_special_time.mp3"
+    },
+    {
+        "title": "Too Far",
+        "description": "you know what's <em>actually</em> wrong with our generation? nobody's making fnaf music anymore",
+        "rarity": "uncommon",
+        "src": "shure_mic_test.mp3"
+    },
+    {
+        "title": "DEATH BY EXECUTION (OG)",
+        "description": "The February 13, 2026 demo for my verse on [\"DEATH BY EXECUTION\"](https://open.spotify.com/track/7jM0y7HnCM73iKzVvFDhOg), amongst Yetibois, Samad Savage, mezaki, Mutant Boy & Solo. This is on heavenlycryptid production, but before an overall mixing redux from yetosky. If, you know, you wanted a version where the vocals were more 'present' or something.",
+        "rarity": "uncommon",
+        "src": "DEATH_BY_EXECUTION_4_yetibois.mp3"
+    },
+    {
+        "title": "i ain't comin' back",
+        "description": "Uploaded [exclusively to SoundCloud](https://soundcloud.com/toxiplays/i-aint-comin-back) on May 11, 2026.",
+        "rarity": "common",
+        "src": "i_aint_comin_back.mp3"
     }
 ]

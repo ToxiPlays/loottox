@@ -224,6 +224,8 @@ const songs = document.querySelectorAll('.song-row > h2');
                     waveform.parentElement.innerHTML = '';
                 }
             } else {
+                let lastSong = document.querySelector(".expanded");
+                if (lastSong) { lastSong.classList.remove("expanded") };
                 song.parentElement.classList.add('expanded');
 
                 const selector = ".song-details > div > div.wavesurfer";

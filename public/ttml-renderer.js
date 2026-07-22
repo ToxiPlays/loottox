@@ -6,6 +6,24 @@ const ADLIB_PRE     = 0.5;   // seconds before first adlib token to show the row
 const ADLIB_POST    = 0.5;   // seconds after last adlib token to hide the row
 
 /**
+ * Standard ease-out-cubic -- used for the token/letter "rise" animation and
+ * the ad-lib font-size grow.
+ */
+function easeOutCubic(x) {
+    return 1 - Math.pow(1 - x, 3);
+}
+
+/**
+ * Median of a numeric array (average of the two middle values when even).
+ */
+function computeMedian(arr) {
+    if (!arr.length) return 0;
+    const s = arr.slice().sort((a, b) => a - b);
+    const mid = Math.floor(s.length / 2);
+    return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+}
+
+/**
  * Parse a TTML timestamp string (MM:SS.sss) to seconds.
  */
 function parseTime(ts) {
@@ -166,6 +184,13 @@ export function mountTTMLRenderer(container, lines, wavesurfer) {
     scroller.className = 'ttml-scroller';
     container.appendChild(scroller);
 
+    // Median main-line word duration, used to decide which words are "long"
+    // enough to get the letter-by-letter rise instead of rising as a whole.
+    const mainDurations = [];
+    lines.forEach(line => line.tokens.forEach(tok => mainDurations.push(tok.end - tok.begin)));
+    const medianWordDur   = computeMedian(mainDurations);
+    const LONG_WORD_LIMIT = medianWordDur * 3;
+
     // Build DOM. Each line element gets:
     //   el.mainRow          — the .ttml-main-row div
     //   el.adlibRowEls      — array of { el, adlib } for each adlib group
@@ -181,12 +206,43 @@ export function mountTTMLRenderer(container, lines, wavesurfer) {
         const mainRow = document.createElement('div');
         mainRow.className = 'ttml-main-row';
         line.tokens.forEach((token, ti) => {
-            if (ti > 0 && token.spaceBefore) mainRow.appendChild(document.createTextNode(' '));
+            if (ti > 0) {
+                if (token.spaceBefore) {
+                    mainRow.appendChild(document.createTextNode(' '));
+                } else {
+                    // Keep adjacent no-space tokens from splitting across lines.
+                    mainRow.appendChild(document.createTextNode('\u2060'));
+                }
+            }
             const span = document.createElement('span');
             span.className = 'ttml-token';
-            span.textContent = token.text;
             span.dataset.begin = token.begin;
             span.dataset.end   = token.end;
+
+            const dur    = token.end - token.begin;
+            const isLong = medianWordDur > 0 && dur > LONG_WORD_LIMIT;
+
+            if (isLong) {
+                // Long word: split into letters, each rising one-by-one,
+                // staggered evenly across the word's duration.
+                span.classList.add('ttml-token--split');
+                const letters = Array.from(token.text);
+                const n       = letters.length;
+                const stagger = dur / n;
+                letters.forEach((ch, li) => {
+                    const letterSpan = document.createElement('span');
+                    letterSpan.className = 'ttml-letter';
+                    letterSpan.textContent = ch === ' ' ? '\u00A0' : ch;
+                    const lb = token.begin + li * stagger;
+                    const le = lb + stagger;
+                    letterSpan.dataset.begin = lb;
+                    letterSpan.dataset.end   = le;
+                    span.appendChild(letterSpan);
+                });
+            } else {
+                span.textContent = token.text;
+            }
+
             mainRow.appendChild(span);
         });
         el.appendChild(mainRow);
@@ -252,6 +308,67 @@ export function mountTTMLRenderer(container, lines, wavesurfer) {
     function getTransitionDuration(lineIdx) {
         const nextBegin = lines[lineIdx + 1]?.begin ?? (lines[lineIdx].end + 0.5);
         return Math.max(0.5, nextBegin - lines[lineIdx].end);
+    }
+
+    // Returns the "leaf" elements that should be animated/swept for a given
+    // top-level main-row token span -- either the letters of a split long
+    // word, or the token span itself.
+    function getMainLeaves(tokEl) {
+        return tokEl.classList.contains('ttml-token--split')
+            ? Array.from(tokEl.querySelectorAll('.ttml-letter'))
+            : [tokEl];
+    }
+
+    // Vertical "rise" offset for a main-line token/letter.
+    // Normal tokens animate from 4px to 0px, long-word letters animate from
+    // 0px to -4px over their own [begin, end] window as they're sung.
+    function updateRise(el, t) {
+        const begin = parseFloat(el.dataset.begin);
+        const end   = parseFloat(el.dataset.end);
+        const isLongLeaf = el.classList.contains('ttml-letter');
+        let offsetPx;
+        if (isLongLeaf) {
+            if (t <= begin) {
+                offsetPx = 4;
+            } else if (t >= end) {
+                offsetPx = 0;
+            } else {
+                const progress = (t - begin) / (end - begin);
+                offsetPx = 4 * easeOutCubic(progress);
+            }
+        } else {
+            if (t <= begin) {
+                offsetPx = 4;
+            } else if (t >= end) {
+                offsetPx = 0;
+            } else {
+                const progress = (t - begin) / (end - begin);
+                offsetPx = 4 * (1 - easeOutCubic(progress));
+            }
+        }
+        el.style.transform = `translateY(${offsetPx.toFixed(2)}px)`;
+    }
+
+    function updateMainLeaf(el, t) {
+        updateSweep(el, t);
+        updateRise(el, t);
+    }
+
+    // Font-size for an ad-lib token: 90% while unsung, easing to 100% over
+    // its own [begin, end] window as it's sung.
+    function updateAdlibScale(tokenEl, t) {
+        const begin = parseFloat(tokenEl.dataset.begin);
+        const end   = parseFloat(tokenEl.dataset.end);
+        let scale;
+        if (t <= begin) {
+            scale = 90;
+        } else if (t >= end) {
+            scale = 100;
+        } else {
+            const progress = (t - begin) / (end - begin);
+            scale = 90 + easeOutCubic(progress) * 10;
+        }
+        tokenEl.style.fontSize = `${scale.toFixed(2)}%`;
     }
 
     function updateSweep(tokenEl, t) {
@@ -352,19 +469,27 @@ export function mountTTMLRenderer(container, lines, wavesurfer) {
                     el.classList.remove('ttml-past');
                     el.style.setProperty('--active-dur', `${getTransitionDuration(i)}s`);
                 }
-                el.mainRow.querySelectorAll('.ttml-token').forEach(tok => updateSweep(tok, t));
+                el.mainRow.querySelectorAll('.ttml-token').forEach(tok => {
+                    getMainLeaves(tok).forEach(leaf => updateMainLeaf(leaf, t));
+                });
             } else if (isPast) {
                 if (!el.classList.contains('ttml-past')) {
                     el.classList.add('ttml-past');
                     el.classList.remove('ttml-active');
                     el.mainRow.querySelectorAll('.ttml-token').forEach(tok => {
-                        tok.style.setProperty('--sweep-pct', '100%');
+                        getMainLeaves(tok).forEach(leaf => {
+                            leaf.style.setProperty('--sweep-pct', '100%');
+                            leaf.style.transform = 'translateY(0px)';
+                        });
                     });
                 }
             } else {
                 el.classList.remove('ttml-active', 'ttml-past');
                 el.mainRow.querySelectorAll('.ttml-token').forEach(tok => {
-                    tok.style.setProperty('--sweep-pct', '0%');
+                    getMainLeaves(tok).forEach(leaf => {
+                        leaf.style.setProperty('--sweep-pct', '0%');
+                        leaf.style.transform = 'translateY(4px)';
+                    });
                 });
             }
 
@@ -374,15 +499,20 @@ export function mountTTMLRenderer(container, lines, wavesurfer) {
 
                 if (visible) {
                     row.classList.remove('ttml-adlib-hidden');
-                    // Sweep adlib tokens on their own timeline
-                    row.querySelectorAll('.ttml-token').forEach(tok => updateSweep(tok, t));
+                    // Sweep + grow adlib tokens on their own timeline
+                    row.querySelectorAll('.ttml-token').forEach(tok => {
+                        updateSweep(tok, t);
+                        updateAdlibScale(tok, t);
+                    });
                 } else {
                     row.classList.add('ttml-adlib-hidden');
-                    // Reset sweep to appropriate edge so it's ready when it appears
-                    const allEnd = adlib.tokens[adlib.tokens.length - 1].end;
-                    const pct    = t >= allEnd ? '100%' : '0%';
+                    // Reset sweep/size to the appropriate edge so it's ready when it appears
                     row.querySelectorAll('.ttml-token').forEach(tok => {
-                        tok.style.setProperty('--sweep-pct', pct);
+                        const tb = parseFloat(tok.dataset.begin);
+                        const te = parseFloat(tok.dataset.end);
+                        const sung = t >= te;
+                        tok.style.setProperty('--sweep-pct', sung ? '100%' : '0%');
+                        tok.style.fontSize = sung ? '100%' : '90%';
                     });
                 }
             });
