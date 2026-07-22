@@ -3,6 +3,28 @@ setInterval(() => {
     if (window.pointlessLoop) {
         debugger;
     }
-}, 1500);
+}, 8000);
 
-// you really shouldn't be here, ya know :[
+//   you really shouldn't be here, ya know :[   //
+//                                              //  
+//                                              //  
+//                                              //  
+//                                              //  
+//                                              //  
+//                                              //  
+//                                              //  
+//                                              //  
+//                                              //  
+//                                              //  
+//                                              //  
+//                                              //  
+//                                              //  
+//                                              //  
+//                                              //  
+//                                              //  
+//                                              //  
+//                                              //  
+//                                              //  
+//                                              //  
+//                                              //  
+//                                              // 
