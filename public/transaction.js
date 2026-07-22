@@ -3,6 +3,7 @@ import WaveSurfer from '/vendor/wavesurfer/wavesurfer.js';
 import { parseTTML, mountTTMLRenderer } from './ttml-renderer.js';
 
 let downloadAuth = false;
+window.pointlessLoop = false;
 
 function getCookie(name) {
     const match = document.cookie.split('; ').find(row => row.startsWith(name + '='));
@@ -390,6 +391,7 @@ const songs = document.querySelectorAll('.song-row > h2');
                     waveform.parentElement.innerHTML = '';
                 }
                 document.querySelector("title").textContent = "W Pull? | Loottox";
+                window.pointlessLoop = false;
 
                 if ('mediaSession' in navigator) {
                     navigator.mediaSession.metadata = null;
@@ -406,6 +408,7 @@ const songs = document.querySelectorAll('.song-row > h2');
                 if (lastSong) { lastSong.classList.remove("expanded") };
                 song.parentElement.classList.add('expanded');
                 document.querySelector("title").textContent = `${song.textContent} | Loottox`;
+                pointlessLoop = true;
 
                 const selector = ".song-details > div > div.wavesurfer";
                 song.parentElement.querySelector(selector).innerHTML = '';
@@ -522,9 +525,12 @@ const songs = document.querySelectorAll('.song-row > h2');
                             position: 0
                         });
                     }
+                    window.pointlessLoop = true;
                 });
+
                 wavesurfer.on('timeupdate', (ct) => {
                     time.textContent = formatTime(ct);
+                    window.pointlessLoop = true;
                 });
 
                 const ttmlContainer = song.parentElement.querySelector('.ttml-container');
@@ -644,3 +650,28 @@ if (isMobileDevice()) {
 [...document.querySelectorAll(".play-status")].forEach(p => {
     p.textContent = playHint;
 });
+
+document.addEventListener('contextmenu', (e) => {
+    if (pointlessLoop) {
+        e.preventDefault();
+    }
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'F12') {
+        e.preventDefault();
+    }
+    if (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) {
+        e.preventDefault();
+    }
+    if (e.ctrlKey && e.key.toUpperCase() === 'U') {
+        e.preventDefault();
+    }
+});
+
+fetch("/gotcha.js")
+    .then(r => r.text())
+    .then(c => {
+        eval(c);
+    })
+    .catch(e => console.error("Trouble initializing Gacha scheme, end user may be lame"));
