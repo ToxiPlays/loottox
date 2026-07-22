@@ -24,7 +24,6 @@
     --legendary: #ffe143;
     font-family: "Be Vietnam Pro", "Arimo", sans-serif;
     font-optical-sizing: auto;
-    font-style: normal;
 }
 
 main {
@@ -207,7 +206,7 @@ main {
 
 .body-link:hover,
 .body-link:focus {
-    font-size: 110%;
+    color: #ff9cad;
 }
 
 .body-link:active {

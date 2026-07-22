@@ -75,7 +75,7 @@ function validateRates() {
     }
 }
 
-function generateTransaction(type, req, res) {
+function generateTransaction(type, req, res, forcedTitles = null) {
     // type: basic, standard, ultra
     const uuid = crypto.randomUUID();
 
@@ -94,6 +94,19 @@ function generateTransaction(type, req, res) {
         transaction.downloadKey = key; // the plaintext key value
         const encryptedKey = aesEncrypt(key, uuid);
         res.cookie('downloadKey', encryptedKey, { httpOnly: false, maxAge: hour });
+    }
+
+    // If specific titles were supplied (admin rig), bypass the random pool
+    // logic entirely and use exactly those songs, in that order.
+    if (Array.isArray(forcedTitles) && forcedTitles.length > 0) {
+        for (const title of forcedTitles) {
+            const song = mediaDictionary.find(s => s.title === title);
+            if (!song) throw new Error(`Song "${title}" not found in media dictionary.`);
+            transaction.items.push(song);
+        }
+        transactions.set(uuid, transaction);
+        console.log(transaction);
+        return transaction;
     }
 
     const pools = {};
@@ -248,10 +261,12 @@ app.get('/api/get-basic-transaction/', (req, res) => {
     }
 
     const map_transaction = findInMap(transactions, 'ip', req.ip);
-    if (map_transaction) {
-        let expiryDate = new Date(map_transaction.item.expiresAt);
+    const ua_transaction = findInMap(transactions, 'user-agent', req.get('User-Agent'));
+    let transaction = map_transaction || ua_transaction || null;
+    if (transaction) {
+        let expiryDate = new Date(transaction.item.expiresAt);
         let age = expiryDate - Date.now();
-        res.cookie('transactionId', map_transaction.item.id, { httpOnly: false, maxAge: age });
+        res.cookie('transactionId', transaction.item.id, { httpOnly: false, maxAge: age });
         res.status(200).send("OK");
     } else {
         const nt = generateTransaction("basic", req, res);
@@ -281,24 +296,6 @@ app.get('/ultra_confirm/', (req, res) => {
         res.status(403).send("erm...");
     }
 });
-
-/*app.get('/api/transaction/:type', (req, res) => {
-    const { type } = req.params;
-    if (!['basic', 'standard', 'ultra'].includes(type)) {
-        return res.status(400).json({ error: 'Invalid transaction type.' });
-    }
-    try {
-        const transaction = generateTransaction(type, req, res);
-        res.cookie('transactionId', transaction.id, { httpOnly: false, maxAge: halfday });
-        res.status(201).json({
-            id: transaction.id,
-            expiresAt: transaction.expiresAt,
-            type: transaction.type,
-        });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});*/
 
 app.get('/api/status/:id', (req, res) => {
     const { id } = req.params;
@@ -449,11 +446,54 @@ app.get('/api/downloadSong/:name', (req, res) => {
 
 const upload = multer({ storage: multer.memoryStorage() });
 
+function isAdminIp(req) {
+    return req.ip.includes('192.168.1.') || req.ip.includes('127.0.0.1');
+}
+
 app.get('/admin', (req, res) => {
-    if (req.ip.includes('192.168.1.') || req.ip.includes('127.0.0.1')) {
+    if (isAdminIp(req)) {
         res.sendFile(path.resolve('src/admin.html'));
     } else {
         res.status(403).json({ success: false, error: "Access denied." });
+    }
+});
+
+app.get('/admin/rig', (req, res) => {
+    if (isAdminIp(req)) {
+        res.sendFile(path.resolve('src/rig.html'));
+    } else {
+        res.status(403).json({ success: false, error: "Access denied." });
+    }
+});
+
+// Returns the full song list (with rarities) for the rig picker UI.
+app.get('/api/admin/songs', (req, res) => {
+    if (!isAdminIp(req)) {
+        return res.status(403).json({ success: false, error: "Access denied." });
+    }
+    res.status(200).json(mediaDictionary);
+});
+
+// Creates an ULTRA transaction whose 5 items are exactly the titles the
+// admin selected, instead of the normal randomized pull.
+app.post('/api/admin/rig_confirm', express.json(), (req, res) => {
+    if (!isAdminIp(req)) {
+        return res.status(403).json({ success: false, error: "Access denied." });
+    }
+    const { titles } = req.body || {};
+    if (!Array.isArray(titles) || titles.length !== 5) {
+        return res.status(400).json({ success: false, error: "Exactly 5 song titles are required." });
+    }
+    const uniqueTitles = new Set(titles);
+    if (uniqueTitles.size !== titles.length) {
+        return res.status(400).json({ success: false, error: "Song titles must be unique." });
+    }
+    try {
+        const nt = generateTransaction("ultra", req, res, titles);
+        res.cookie('transactionId', nt.id, { httpOnly: false, maxAge: halfday });
+        res.status(200).json({ success: true });
+    } catch (error) {
+        res.status(400).json({ success: false, error: error.message });
     }
 });
 

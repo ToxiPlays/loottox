@@ -377,6 +377,7 @@ const songs = document.querySelectorAll('.song-row > h2');
             if (document.querySelectorAll('.song-row > h2.blurred').length === 0) {
                 fadeOutGlow();
                 document.removeEventListener('mousemove', updateGlowVolume);
+                document.querySelector("title").textContent = `W Pull? | Loottox`;
             }
         }
         else {
@@ -388,10 +389,12 @@ const songs = document.querySelectorAll('.song-row > h2');
                 if (waveform) {
                     waveform.parentElement.innerHTML = '';
                 }
+                document.querySelector("title").textContent = "W Pull? | Loottox";
             } else {
                 let lastSong = document.querySelector(".expanded");
                 if (lastSong) { lastSong.classList.remove("expanded") };
                 song.parentElement.classList.add('expanded');
+                document.querySelector("title").textContent = `${song.textContent} | Loottox`;
 
                 const selector = ".song-details > div > div.wavesurfer";
                 song.parentElement.querySelector(selector).innerHTML = '';
@@ -424,6 +427,14 @@ const songs = document.querySelectorAll('.song-row > h2');
 
                 wavesurfer.on('interaction', () => {
                     wavesurfer.playPause();
+                });
+
+                wavesurfer.on('play', () => {
+                    document.querySelector("title").textContent = `▶ ${song.textContent}`;
+                });
+
+                wavesurfer.on('pause', () => {
+                    document.querySelector("title").textContent = `⏸ ${song.textContent}`;
                 });
 
                 waveform.addEventListener('pointermove', (e) => (hover.style.width = `${e.offsetX}px`));
@@ -519,6 +530,7 @@ const songs = document.querySelectorAll('.song-row > h2');
 });
 
 document.getElementById('gimme-the-loot').addEventListener('click', () => {
+    document.querySelector("title").textContent = `The Great Unboxing | Loottox`;
     document.querySelector('.intro').classList.add('hidden');
     document.querySelector('main').classList.remove('hidden');
     startGlowLoop();
