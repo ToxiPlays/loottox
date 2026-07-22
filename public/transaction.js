@@ -441,7 +441,6 @@ const songs = document.querySelectorAll('.song-row > h2');
 
                 if ('mediaSession' in navigator) {
                     let rarityIcon;
-
                     switch (song.className) {
                         case "common":
                             rarityIcon = "⬜";
