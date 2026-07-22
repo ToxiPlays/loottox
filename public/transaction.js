@@ -614,3 +614,33 @@ document.getElementById('gimme-the-loot').addEventListener('click', () => {
     startGlowLoop();
     document.addEventListener('mousemove', updateGlowVolume);
 });
+
+function isMobileDevice() {
+  if (navigator.userAgentData && navigator.userAgentData.mobile !== undefined) {
+    return navigator.userAgentData.mobile;
+  }
+  
+  const hasTouch = window.matchMedia("(pointer: coarse)").matches || 
+                    'ontouchstart' in window || 
+                    navigator.maxTouchPoints > 0;
+  const isSmallScreen = window.matchMedia("(max-width: 768px)").matches;
+  
+  if (hasTouch && isSmallScreen) {
+    return true;
+  }
+
+  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+  return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+}
+
+let playHint;
+
+if (isMobileDevice()) {
+    playHint = "Use your device's built-in media player to play the song.";
+} else {
+    playHint = "Click the waveform to play/pause playback.";
+}
+
+[...document.querySelectorAll(".play-status")].forEach(p => {
+    p.textContent = playHint;
+});
