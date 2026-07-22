@@ -390,6 +390,17 @@ const songs = document.querySelectorAll('.song-row > h2');
                     waveform.parentElement.innerHTML = '';
                 }
                 document.querySelector("title").textContent = "W Pull? | Loottox";
+
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.metadata = null;
+                    navigator.mediaSession.playbackState = 'none';
+                }
+
+                navigator.mediaSession.setActionHandler('play', null);
+                navigator.mediaSession.setActionHandler('pause', null);
+                navigator.mediaSession.setActionHandler('stop', null);
+                navigator.mediaSession.setActionHandler('previoustrack', null);
+                navigator.mediaSession.setActionHandler('nexttrack', null);
             } else {
                 let lastSong = document.querySelector(".expanded");
                 if (lastSong) { lastSong.classList.remove("expanded") };
@@ -425,6 +436,62 @@ const songs = document.querySelectorAll('.song-row > h2');
                     url: `/api/getSong/${encodeURIComponent(song.textContent)}`,
                 });
 
+                if ('mediaSession' in navigator) {
+                    let rarityIcon;
+
+                    switch (song.className) {
+                        case "common":
+                            rarityIcon = "⬜";
+                            break;
+                        case "uncommon":
+                            rarityIcon = "🟩";
+                            break;
+                        case "rare":
+                            rarityIcon = "🟦";
+                            break;
+                        case "legendary":
+                            rarityIcon = "🟨";
+                            break;
+                        default:
+                            rarityIcon;
+                    }
+
+                    navigator.mediaSession.metadata = new MediaMetadata({
+                        title: `${rarityIcon} ${song.textContent}`,
+                        artist: 'ToxiPlays',
+                        album: 'Loottox',
+                        artwork: [
+                            { src: `/icons/${song.className}_cover.png`, sizes: '800x800', type: 'image/png' },
+                            { src: '/icons/favicon-128.png', sizes: '128x128', type: 'image/png' },
+                        ]
+                    });
+
+                    navigator.mediaSession.setActionHandler("play", () => {
+                        wavesurfer.play();
+                    });
+
+                    navigator.mediaSession.setActionHandler("pause", () => {
+                        wavesurfer.pause();
+                    });
+
+                    navigator.mediaSession.setActionHandler("stop", () => {
+                        wavesurfer.stop();
+                    });
+
+                    navigator.mediaSession.setActionHandler("nexttrack", () => {
+                        wavesurfer.stop();
+                    });
+
+                    navigator.mediaSession.setActionHandler("previoustrack", () => {
+                        wavesurfer.setTime(0);
+                        wavesurfer.play();
+                    });
+
+                    navigator.mediaSession.setActionHandler("seekto", (details) => {
+                        wavesurfer.setTime(details.seekTime);
+                    });
+                }
+
                 wavesurfer.on('interaction', () => {
                     wavesurfer.playPause();
                 });
@@ -446,8 +513,19 @@ const songs = document.querySelectorAll('.song-row > h2');
                     return `${minutes}:${paddedSeconds}`
                 }
 
-                wavesurfer.on('decode', (d) => (duration.textContent = formatTime(d)));
-                wavesurfer.on('timeupdate', (ct) => (time.textContent = formatTime(ct)));
+                wavesurfer.on('decode', (d) => {
+                    duration.textContent = formatTime(d);
+                    if ('mediaSession' in navigator && 'setPositionState' in navigator.mediaSession) {
+                        navigator.mediaSession.setPositionState({
+                            duration: d,
+                            playbackRate: 1.0,
+                            position: 0
+                        });
+                    }
+                });
+                wavesurfer.on('timeupdate', (ct) => {
+                    time.textContent = formatTime(ct);
+                });
 
                 const ttmlContainer = song.parentElement.querySelector('.ttml-container');
                 wavesurfer.on('ready', () => {
