@@ -130,5 +130,11 @@
         "description": "The classic ballad between insomnia and hypersomnia, [originally released by Scarlett Parker in 2021](https://open.spotify.com/track/52EkuIL8iORFZItfLPBKP0), completely recreated in May 2025. New verse lyrics and completely new vocals, only available in this pull. Aren't you so lucky?\r\n\r\nOriginal was track 5 from Ms. Parker's debut album, <i>WAS IT WORTH IT?</i>.",
         "rarity": "uncommon",
         "src": "wfys_2.mp3"
+    },
+    {
+        "title": "WHAT IT FEELS LIKE",
+        "description": "okay if you check the exact date this file is created and the exact date of this commit, this song is genuinely exactly 1 month old that's crazy\r\n\r\nplease get on my ass about re-recording this on an actual mic btw :')",
+        "rarity": "legendary",
+        "src": "what_it_feels_like_prod_frost.mp3"
     }
 ]
