@@ -19,9 +19,9 @@
 * {
     background-color: #0f0404;
     --common: #dbdbdb;
-    --uncommon: #0a9739;
-    --rare: #007acc;
-    --legendary: #ffd700;
+    --uncommon: #5adf86;
+    --rare: #48a4e2;
+    --legendary: #ffe143;
     font-family: "Be Vietnam Pro", "Arimo", sans-serif;
     font-optical-sizing: auto;
     font-style: normal;
@@ -51,6 +51,15 @@ main {
 .song-row > h2 {
     transition: all 0.3s ease-in-out;
     text-shadow: 0px 5px 3px black;
+}
+
+.song-row > h2:hover,
+.song-row > h2:focus {
+    transform: translateY(-2px);
+}
+
+.song-row > h2:active {
+    transform: translateY(1px);
 }
 
 .common {
@@ -224,7 +233,7 @@ main {
   border: none;
   color: #fff;
   cursor: pointer;
-  background-color: #ff607a;
+  background-color: #6c1c2a;
   transition: all 0.2s ease;
 }
 
@@ -246,15 +255,15 @@ main {
 
 .download-btn:hover:before {
   top: -70%;
-  background-image: radial-gradient(circle, #ff607a 20%, transparent 20%),
-    radial-gradient(circle, transparent 20%, #ff607a 20%, transparent 30%),
-    radial-gradient(circle, #ff607a 20%, transparent 20%),
-    radial-gradient(circle, #ff607a 20%, transparent 20%),
-    radial-gradient(circle, transparent 10%, #ff607a 15%, transparent 20%),
-    radial-gradient(circle, #ff607a 20%, transparent 20%),
-    radial-gradient(circle, #ff607a 20%, transparent 20%),
-    radial-gradient(circle, #ff607a 20%, transparent 20%),
-    radial-gradient(circle, #ff607a 20%, transparent 20%);
+  background-image: radial-gradient(circle, #6c1c2a 20%, transparent 20%),
+    radial-gradient(circle, transparent 20%, #6c1c2a 20%, transparent 30%),
+    radial-gradient(circle, #6c1c2a 20%, transparent 20%),
+    radial-gradient(circle, #6c1c2a 20%, transparent 20%),
+    radial-gradient(circle, transparent 10%, #6c1c2a 15%, transparent 20%),
+    radial-gradient(circle, #6c1c2a 20%, transparent 20%),
+    radial-gradient(circle, #6c1c2a 20%, transparent 20%),
+    radial-gradient(circle, #6c1c2a 20%, transparent 20%),
+    radial-gradient(circle, #6c1c2a 20%, transparent 20%);
   background-size: 10% 10%, 20% 20%, 15% 15%, 20% 20%, 18% 18%, 10% 10%, 15% 15%,
     10% 10%, 18% 18%;
   background-position: 50% 120%;
@@ -281,13 +290,13 @@ main {
 
 .download-btn:hover::after {
   bottom: -70%;
-  background-image: radial-gradient(circle, #ff607a 20%, transparent 20%),
-    radial-gradient(circle, #ff607a 20%, transparent 20%),
-    radial-gradient(circle, transparent 10%, #ff607a 15%, transparent 20%),
-    radial-gradient(circle, #ff607a 20%, transparent 20%),
-    radial-gradient(circle, #ff607a 20%, transparent 20%),
-    radial-gradient(circle, #ff607a 20%, transparent 20%),
-    radial-gradient(circle, #ff607a 20%, transparent 20%);
+  background-image: radial-gradient(circle, #6c1c2a 20%, transparent 20%),
+    radial-gradient(circle, #6c1c2a 20%, transparent 20%),
+    radial-gradient(circle, transparent 10%, #6c1c2a 15%, transparent 20%),
+    radial-gradient(circle, #6c1c2a 20%, transparent 20%),
+    radial-gradient(circle, #6c1c2a 20%, transparent 20%),
+    radial-gradient(circle, #6c1c2a 20%, transparent 20%),
+    radial-gradient(circle, #6c1c2a 20%, transparent 20%);
   background-size: 15% 15%, 20% 20%, 18% 18%, 20% 20%, 15% 15%, 20% 20%, 18% 18%;
   background-position: 50% 0%;
   animation: greenbottomBubbles 0.6s ease;

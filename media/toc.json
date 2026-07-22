@@ -106,5 +106,23 @@
         "description": "Uploaded [exclusively to SoundCloud](https://soundcloud.com/toxiplays/i-aint-comin-back) on May 11, 2026.",
         "rarity": "common",
         "src": "i_aint_comin_back.mp3"
+    },
+    {
+        "title": "tell me",
+        "description": "larpinairy bro 😭",
+        "rarity": "uncommon",
+        "src": "tell_me.mp3"
+    },
+    {
+        "title": "Let the Blood Rush",
+        "description": "Exported Nov. 05, 2023, featuring vocals from MB Hollow. Distributed to all streaming platforms on the 18th of that month, and taken down after the latter rebranded.",
+        "rarity": "rare",
+        "src": "blood_rush_w_mb_hollow_.mp3"
+    },
+    {
+        "title": "WALK WALK WALK",
+        "description": "WAAAAAAAAAAAAAALKKKKKKKKKKKKKKK‼‼‼‼\r\n\r\nlil sneak peek @ what's gonna happen during THE WORLD IS YOURS era",
+        "rarity": "legendary",
+        "src": "walk_walk_walk_prod_lugo.mp3"
     }
 ]

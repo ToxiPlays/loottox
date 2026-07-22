@@ -130,12 +130,14 @@
 
 .ttml-adlib-token {
     display: inline-block;
-    font-size: 90%;
+    /* font-size modified by js */
+    font-size: 85%;
     transition: font-size var(--adlib-rise-dur, 0.3s) ease;
 }
 
 .ttml-adlib-token.ttml-adlib-token--risen {
-    font-size: 100%;
+    /* font-size modified by js */
+    font-size: 90%;
 }
 
 .ttml-gap-line {

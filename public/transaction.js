@@ -119,6 +119,171 @@ function playRaritySfx(rarity) {
     audio.play();
 }
 
+// --- Rough loudness normalization ---
+// Not a certified BS.1770 meter (no true-peak limiting, no multichannel weighting
+// beyond stereo/mono), but close enough to catch songs that are mastered much
+// louder/quieter than the rest of a transaction and rein them in.
+const TARGET_LUFS_MIN = -10;
+const TARGET_LUFS_MAX = -7;
+
+let sharedAudioCtx = null;
+function getAudioCtx() {
+    if (!sharedAudioCtx) {
+        sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    return sharedAudioCtx;
+}
+
+function makeBiquad(sampleRate, type, freq, Q, gainFactor) {
+    const w0 = 2 * Math.PI * freq / sampleRate;
+    const cosW0 = Math.cos(w0);
+    const sinW0 = Math.sin(w0);
+
+    if (type === 'highshelf') {
+        const A = Math.sqrt(gainFactor);
+        const alpha = (sinW0 / 2) * Math.sqrt((A + 1 / A) * (1 / Q - 1) + 2);
+        const twoSqrtAAlpha = 2 * Math.sqrt(A) * alpha;
+
+        const b0 = A * ((A + 1) + (A - 1) * cosW0 + twoSqrtAAlpha);
+        const b1 = -2 * A * ((A - 1) + (A + 1) * cosW0);
+        const b2 = A * ((A + 1) + (A - 1) * cosW0 - twoSqrtAAlpha);
+        const a0 = (A + 1) - (A - 1) * cosW0 + twoSqrtAAlpha;
+        const a1 = 2 * ((A - 1) - (A + 1) * cosW0);
+        const a2 = (A + 1) - (A - 1) * cosW0 - twoSqrtAAlpha;
+
+        return { b0: b0 / a0, b1: b1 / a0, b2: b2 / a0, a1: a1 / a0, a2: a2 / a0 };
+    }
+
+    if (type === 'highpass2') {
+        const alpha = sinW0 / (2 * Q);
+        const b0 = (1 + cosW0) / 2;
+        const b1 = -(1 + cosW0);
+        const b2 = (1 + cosW0) / 2;
+        const a0 = 1 + alpha;
+        const a1 = -2 * cosW0;
+        const a2 = 1 - alpha;
+
+        return { b0: b0 / a0, b1: b1 / a0, b2: b2 / a0, a1: a1 / a0, a2: a2 / a0 };
+    }
+
+    throw new Error('Unsupported filter type: ' + type);
+}
+
+function applyBiquad(input, coeffs) {
+    const { b0, b1, b2, a1, a2 } = coeffs;
+    const output = new Float32Array(input.length);
+    let x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+    for (let i = 0; i < input.length; i++) {
+        const x0 = input[i];
+        const y0 = b0 * x0 + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2;
+        output[i] = y0;
+        x2 = x1; x1 = x0;
+        y2 = y1; y1 = y0;
+    }
+    return output;
+}
+
+// Estimates integrated loudness in LUFS using K-weighting + gated block
+// averaging, per the ITU-R BS.1770 approach.
+function computeIntegratedLUFS(audioBuffer) {
+    const sampleRate = audioBuffer.sampleRate;
+    const numChannels = audioBuffer.numberOfChannels;
+
+    // K-weighting: a high-shelf "pre-filter" followed by a high-pass "RLB" stage.
+    // Reference coefficients from BS.1770, applied as-is regardless of sample rate
+    // since this is meant to be a rough estimate, not a certified meter.
+    const preFilter = makeBiquad(sampleRate, 'highshelf', 1681.97, 1.0, 3.999843853973347);
+    const rlbFilter = makeBiquad(sampleRate, 'highpass2', 38.13547087613982, 0.5003270373238773);
+
+    const filteredChannels = [];
+    for (let ch = 0; ch < numChannels; ch++) {
+        const raw = audioBuffer.getChannelData(ch);
+        filteredChannels.push(applyBiquad(applyBiquad(raw, preFilter), rlbFilter));
+    }
+
+    const blockSize = Math.round(0.4 * sampleRate); // 400ms gating blocks
+    const hopSize = Math.round(blockSize * 0.25);   // 75% overlap
+    const length = filteredChannels[0].length;
+
+    if (length < blockSize) return -70; // too short to measure meaningfully
+
+    const meanSquareToLUFS = ms => -0.691 + 10 * Math.log10(Math.max(ms, 1e-12));
+    const lufsToMeanSquare = l => Math.pow(10, (l + 0.691) / 10);
+
+    const blockLoudness = [];
+    for (let start = 0; start + blockSize <= length; start += hopSize) {
+        let sum = 0;
+        for (let ch = 0; ch < numChannels; ch++) {
+            const data = filteredChannels[ch];
+            let chSum = 0;
+            for (let i = start; i < start + blockSize; i++) {
+                chSum += data[i] * data[i];
+            }
+            sum += chSum / blockSize;
+        }
+        blockLoudness.push(meanSquareToLUFS(sum));
+    }
+
+    // Absolute gate at -70 LUFS
+    const absGated = blockLoudness.filter(l => l > -70);
+    if (absGated.length === 0) return -70;
+
+    const avgAbsMS = absGated.reduce((a, l) => a + lufsToMeanSquare(l), 0) / absGated.length;
+    const relativeThreshold = meanSquareToLUFS(avgAbsMS) - 10;
+
+    // Relative gate at (absolute-gated average - 10 LU)
+    const relGated = absGated.filter(l => l > relativeThreshold);
+    if (relGated.length === 0) return meanSquareToLUFS(avgAbsMS);
+
+    const avgRelMS = relGated.reduce((a, l) => a + lufsToMeanSquare(l), 0) / relGated.length;
+    return meanSquareToLUFS(avgRelMS);
+}
+
+// How many dB to apply to bring measuredLUFS into [TARGET_LUFS_MIN, TARGET_LUFS_MAX].
+function gainDbForTarget(measuredLUFS) {
+    if (measuredLUFS <= TARGET_LUFS_MIN) return TARGET_LUFS_MIN - measuredLUFS; // boost (positive)
+    if (measuredLUFS >= TARGET_LUFS_MAX) return TARGET_LUFS_MAX - measuredLUFS; // cut (negative)
+    return 0; // already inside the target range
+}
+
+function applyGainNode(wavesurfer, gainDb) {
+    const mediaEl = wavesurfer.getMediaElement ? wavesurfer.getMediaElement() : null;
+    if (!mediaEl) return;
+
+    const audioCtx = getAudioCtx();
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+    }
+
+    let sourceNode = mediaEl._loudnessSourceNode;
+    let gainNode = mediaEl._loudnessGainNode;
+
+    if (!sourceNode) {
+        sourceNode = audioCtx.createMediaElementSource(mediaEl);
+        gainNode = audioCtx.createGain();
+        sourceNode.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        mediaEl._loudnessSourceNode = sourceNode;
+        mediaEl._loudnessGainNode = gainNode;
+    }
+
+    const linearGain = Math.pow(10, gainDb / 20);
+    gainNode.gain.setValueAtTime(linearGain, audioCtx.currentTime);
+}
+
+function normalizeLoudness(wavesurfer) {
+    try {
+        const audioBuffer = wavesurfer.getDecodedData ? wavesurfer.getDecodedData() : null;
+        if (!audioBuffer) return;
+
+        const measuredLUFS = computeIntegratedLUFS(audioBuffer);
+        const gainDb = gainDbForTarget(measuredLUFS);
+        applyGainNode(wavesurfer, gainDb);
+    } catch (err) {
+        console.error('Loudness normalization failed:', err);
+    }
+}
+
 let activeTTMLRenderer = null;
 
 function destroyTTMLRenderer() {
@@ -276,6 +441,7 @@ const songs = document.querySelectorAll('.song-row > h2');
                 const ttmlContainer = song.parentElement.querySelector('.ttml-container');
                 wavesurfer.on('ready', () => {
                     loadAndMountTTML(song.textContent, ttmlContainer, wavesurfer);
+                    normalizeLoudness(wavesurfer);
                 });
 
                 const songRow = song.parentElement;

@@ -6,8 +6,8 @@ export const basic = {
 };
 
 export const standard = {
-    common: 55,
-    uncommon: 20,
-    rare: 15,
+    common: 50,
+    uncommon: 24,
+    rare: 16,
     legendary: 10,
 };

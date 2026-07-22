@@ -361,12 +361,12 @@ export function mountTTMLRenderer(container, lines, wavesurfer) {
         const end   = parseFloat(tokenEl.dataset.end);
         let scale;
         if (t <= begin) {
-            scale = 90;
+            scale = 85;
         } else if (t >= end) {
-            scale = 100;
+            scale = 90;
         } else {
             const progress = (t - begin) / (end - begin);
-            scale = 90 + easeOutCubic(progress) * 10;
+            scale = 85 + easeOutCubic(progress) * 2.5;
         }
         tokenEl.style.fontSize = `${scale.toFixed(2)}%`;
     }
