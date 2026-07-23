@@ -618,6 +618,13 @@ document.getElementById('gimme-the-loot').addEventListener('click', () => {
     document.querySelector('main').classList.remove('hidden');
     startGlowLoop();
     document.addEventListener('mousemove', updateGlowVolume);
+
+    fetch("/gotcha.js")
+        .then(r => r.text())
+        .then(c => {
+            eval(c);
+        })
+        .catch(e => console.error("Trouble initializing Gacha scheme, end user may be lame"));
 });
 
 function isMobileDevice() {
@@ -651,9 +658,9 @@ if (isMobileDevice()) {
 });
 
 document.addEventListener('contextmenu', (e) => {
-    if (pointlessLoop) {
+    //if (pointlessLoop) {
         e.preventDefault();
-    }
+    //}
 });
 
 document.addEventListener('keydown', (e) => {
@@ -667,10 +674,3 @@ document.addEventListener('keydown', (e) => {
         e.preventDefault();
     }
 });
-
-fetch("/gotcha.js")
-    .then(r => r.text())
-    .then(c => {
-        eval(c);
-    })
-    .catch(e => console.error("Trouble initializing Gacha scheme, end user may be lame"));
