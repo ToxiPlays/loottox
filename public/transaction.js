@@ -648,7 +648,7 @@ function isMobileDevice() {
 let playHint;
 
 if (isMobileDevice()) {
-    playHint = "Use your device's built-in media player to listen to the song.";
+    playHint = "Use your device's built-in media player to control playback.";
 } else {
     playHint = "Click the waveform to play/pause playback.";
 }
