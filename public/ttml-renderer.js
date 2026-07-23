@@ -1,14 +1,7 @@
-// ttml-renderer.js
-// Parses Apple Music TTML and drives a lyric display inside .ttml-container
-
 const GAP_THRESHOLD = 5;     // seconds — gaps longer than this get an interstitial line
 const ADLIB_PRE     = 0.5;   // seconds before first adlib token to show the row
 const ADLIB_POST    = 0.5;   // seconds after last adlib token to hide the row
 
-/**
- * Standard ease-out-cubic -- used for the token/letter "rise" animation and
- * the ad-lib font-size grow.
- */
 function easeOutCubic(x) {
     return 1 - Math.pow(1 - x, 3);
 }
@@ -184,8 +177,6 @@ export function mountTTMLRenderer(container, lines, wavesurfer) {
     scroller.className = 'ttml-scroller';
     container.appendChild(scroller);
 
-    // Median main-line word duration, used to decide which words are "long"
-    // enough to get the letter-by-letter rise instead of rising as a whole.
     const mainDurations = [];
     lines.forEach(line => line.tokens.forEach(tok => mainDurations.push(tok.end - tok.begin)));
     const medianWordDur   = computeMedian(mainDurations);
@@ -210,7 +201,6 @@ export function mountTTMLRenderer(container, lines, wavesurfer) {
                 if (token.spaceBefore) {
                     mainRow.appendChild(document.createTextNode(' '));
                 } else {
-                    // Keep adjacent no-space tokens from splitting across lines.
                     mainRow.appendChild(document.createTextNode('\u2060'));
                 }
             }
@@ -248,7 +238,6 @@ export function mountTTMLRenderer(container, lines, wavesurfer) {
         el.appendChild(mainRow);
         el.mainRow = mainRow;
 
-        // Adlib rows — hidden by default, shown/hidden independently in the RAF loop
         el.adlibRowEls = line.adlibs.map(adlib => {
             const row = document.createElement('div');
             row.className = 'ttml-adlib-row ttml-adlib-hidden';
@@ -319,9 +308,7 @@ export function mountTTMLRenderer(container, lines, wavesurfer) {
             : [tokEl];
     }
 
-    // Vertical "rise" offset for a main-line token/letter.
-    // Normal tokens animate from 4px to 0px, long-word letters animate from
-    // 0px to -4px over their own [begin, end] window as they're sung.
+    // Vertical "rise" offset for a main-line token/letter as it is sung
     function updateRise(el, t) {
         const begin = parseFloat(el.dataset.begin);
         const end   = parseFloat(el.dataset.end);
@@ -354,7 +341,7 @@ export function mountTTMLRenderer(container, lines, wavesurfer) {
         updateRise(el, t);
     }
 
-    // Font-size for an ad-lib token: 90% while unsung, easing to 100% over
+    // Font-size for an ad-lib token: 80% while unsung, easing to 95% over
     // its own [begin, end] window as it's sung.
     function updateAdlibScale(tokenEl, t) {
         const begin = parseFloat(tokenEl.dataset.begin);
