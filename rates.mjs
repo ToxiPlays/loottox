@@ -1,6 +1,6 @@
 export const basic = {
-    common: 70,
-    uncommon: 15,
+    common: 65,
+    uncommon: 20,
     rare: 10,
     legendary: 5,
 };

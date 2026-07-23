@@ -512,7 +512,7 @@ export function mountTTMLRenderer(container, lines, wavesurfer) {
                         const te = parseFloat(tok.dataset.end);
                         const sung = t >= te;
                         tok.style.setProperty('--sweep-pct', sung ? '100%' : '0%');
-                        tok.style.fontSize = sung ? '100%' : '90%';
+                        tok.style.fontSize = sung ? '90%' : '85%';
                     });
                 }
             });

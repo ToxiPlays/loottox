@@ -136,5 +136,29 @@
         "description": "okay if you check the exact date this file is created and the exact date of this commit, this song is genuinely exactly 1 month old that's crazy\r\n\r\nplease get on my ass about re-recording this on an actual mic btw :')",
         "rarity": "legendary",
         "src": "what_it_feels_like_prod_frost.mp3"
+    },
+    {
+        "title": "The Man",
+        "description": "Exported December 31, 2024. Featuring vocals from Jalisa.\r\n\r\nThis song (well, part of it) was actually included in [Scribe Workshop](https://scribe-workshop.onrender.com/) as a RAP transcription, before being pulled from the catalogue. But that's a public release, making this rare.",
+        "rarity": "rare",
+        "src": "_the_man_with_jalisa.mp3"
+    },
+    {
+        "title": "UNTIL I PASS OUT",
+        "description": "Exported Oct 31, 2024. This was released... somewhere. Only cool people get the link though. Or you could... y'know... listen to it here ^_^",
+        "rarity": "common",
+        "src": "UNTIL_I_PASS_OUT.mp3"
+    },
+    {
+        "title": "UP!",
+        "description": "<strong>Originally</strong> released to streaming platforms on December 13, 2021. Featuring vocals from Livr.\r\n\r\nThis track generated around $0.31 from 51 streams before Spotify decided years later that those streams were fake and told RouteNote to delete the song from everywhere.\r\n\r\nI'm so for real, [look at the smartlink](https://laylo.com/toxadil/okgOp). It's just gone now. Good thing I still have the final mix!",
+        "rarity": "rare",
+        "src": "UP_ft_Livr.mp3"
+    },
+    {
+        "title": "DOUBLE UP",
+        "description": "Originally [posted to Twitter](https://x.com/toximixs/status/1896313124942418198?s=20) on March 2, 2025.\r\nRemastered and extended for Loottox.",
+        "rarity": "common",
+        "src": "double_up_source_loottox.mp3"
     }
 ]
