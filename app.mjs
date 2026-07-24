@@ -466,6 +466,11 @@ app.post('/subscribe-transaction-notification', (req, res) => {
         const result = validateTransactionID(id);
         if (result.valid) {
             const ta = transactions.get(id);
+            if (ta.notifyArmed) {
+                return res.status(200).json({ success: true, alreadySubscribed: true });
+            }
+            ta.notifyArmed = true;
+
             res.status(201).json({ success: true });
 
             const diffMs = ta.expiresAt - new Date();
@@ -500,13 +505,11 @@ app.post('/subscribe-transaction-notification', (req, res) => {
                 .then(() => {
                     setTimeout(() => {
                         webpush.sendNotification(subscription, payload2)
-                        .then(() => {
-
-                        })
                         .catch(err => console.error('Error sending follow-up notification:', err));
                     }, diffMs);
                 })
                 .catch(err => console.error('Error sending initial notification:', err));
+                ta.notifyArmed = false; // never actually got scheduled — allow a retry
         } else {
             res.status(403).json({ success: false, error: result.message })
         }

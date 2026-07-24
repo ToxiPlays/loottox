@@ -6,6 +6,19 @@ let notifyBtn = document.getElementById('subscribeNotifications');
 let downloadAuth = false;
 window.pointlessLoop = false;
 
+async function reflectExistingSubscription() {
+    if (!('serviceWorker' in navigator)) return;
+    const reg = await navigator.serviceWorker.getRegistration('/');
+    if (!reg) return;
+    const existing = await reg.pushManager.getSubscription();
+    if (existing) {
+        notifyBtn.title = "";
+        notifyBtn.textContent = "All Set";
+        notifyBtn.disabled = true;
+    }
+}
+reflectExistingSubscription();
+
 function getCookie(name) {
     const match = document.cookie.split('; ').find(row => row.startsWith(name + '='));
     return match ? match.split('=')[1] : null;
@@ -686,15 +699,22 @@ document.addEventListener('keydown', (e) => {
 const publicVapidKey = 'BNLBoN61qrU995Kcf6XGu4u23FB4yMsrFZVS9bnyubjcuZBFuHwYjbyrpf35LXvr6iJT1a0dzN7dzFzX3rx8HVc';
 
 notifyBtn.addEventListener('click', () => {
+    if ('serviceWorker' in navigator) {
+        const reg = await navigator.serviceWorker.getRegistration('/');
+        const existing = reg && await reg.pushManager.getSubscription();
+        if (existing) {
+            notifyBtn.title = "";
+            notifyBtn.textContent = "All Set";
+            notifyBtn.disabled = true;
+            return;
+        }
+    }
+
     Notification.requestPermission((permission) => {
         if (permission === "granted") {
             notifyBtn.title = "";
             notifyBtn.textContent = "All Set";
             notifyBtn.disabled = true;
-            /*new Notification("You're all set!", {
-                body: "Ooh, your notification box is cozy. We'll flag you down when you're ready for a new pull!",
-                icon: "/icons/common_cover.png"
-            });*/
             if ('serviceWorker' in navigator) {
                 sendSubscription().catch(err => console.error(err));
             }
