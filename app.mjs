@@ -1,6 +1,9 @@
 import { basic, standard } from './rates.mjs';
 import mediaDictionary from "./media/toc.json" with { type: "json" };
 import cryptoModule from 'crypto';
+import webpush from 'web-push';
+import bodyParser from 'body-parser';
+import cors from 'cors';
 
 const halfday = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
 const hour = 60 * 60 * 1000;
@@ -193,7 +196,18 @@ import fs from 'fs';
 
 const app = express();
 app.use(cookieParser());
+app.use(cors());
+app.use(bodyParser.json());
 const port = 3000;
+
+const publicVapidKey = 'BNLBoN61qrU995Kcf6XGu4u23FB4yMsrFZVS9bnyubjcuZBFuHwYjbyrpf35LXvr6iJT1a0dzN7dzFzX3rx8HVc';
+const privateVapidKey = 'KqOkfLp4oXsncDjcrML37WoVjgapQZ4vt4kW0aIlZxU';
+
+webpush.setVapidDetails(
+  'mailto:toxiplays@toxadil.com',
+  publicVapidKey,
+  privateVapidKey
+);
 
 app.set('trust proxy', 1); 
 
@@ -442,6 +456,63 @@ app.get('/api/downloadSong/:name', (req, res) => {
             res.status(500).json({ success: false, message: 'Failed to send the file. Please try again.' });
         }
     });
+});
+
+app.post('/subscribe-transaction-notification', (req, res) => {
+    const subscription = req.body;
+
+    const id = req.cookies.transactionId;
+    try {
+        const result = validateTransactionID(id);
+        if (result.valid) {
+            const ta = transactions.get(id);
+            res.status(201).json({ success: true });
+
+            const diffMs = ta.expiresAt - new Date();
+            const minutes = Math.floor(diffMs / (1000 * 60)) % 60;
+            const hours = Math.floor(diffMs / (1000 * 60 * 60)) % 24;
+
+            const payload1 = JSON.stringify({
+                title: "You're all set!",
+                body: `Ooh, your notification box is cozy. We'll flag you down when a new pull is ready for you in ${hours} hour${hours === 1 ? "" : "s"} and ${minutes} minute${minutes === 1 ? "" : "s"}!`
+            });
+
+            const hour = new Date().getHours();
+            let greeting;
+
+            if (hour >= 22 || hour < 4) {
+                greeting = "Hey, night owl!";
+            } else if (hour < 12) {
+                greeting = "Good morning!";
+            } else if (hour < 18) {
+                greeting = "Good afternoon!";
+            } else {
+                greeting = "Good evening!";
+            }
+
+            const payload2 = JSON.stringify({
+                title: greeting,
+                body: "Huff... puff... hey, you! Your 12 hours are up. Come back to Loottox and get your next pull!",
+                final: true
+            })
+
+            webpush.sendNotification(subscription, payload1)
+                .then(() => {
+                    setTimeout(() => {
+                        webpush.sendNotification(subscription, payload2)
+                        .then(() => {
+
+                        })
+                        .catch(err => console.error('Error sending follow-up notification:', err));
+                    }, diffMs);
+                })
+                .catch(err => console.error('Error sending initial notification:', err));
+        } else {
+            res.status(403).json({ success: false, error: result.message })
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
 const upload = multer({ storage: multer.memoryStorage() });

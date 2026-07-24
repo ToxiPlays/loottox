@@ -10,9 +10,12 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "body-parser": "^2.3.0",
     "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
     "express": "^5.2.1",
     "multer": "^2.2.0",
-    "wavesurfer.js": "^7.12.8"
+    "wavesurfer.js": "^7.12.8",
+    "web-push": "^3.6.7"
   }
 }

@@ -2,6 +2,7 @@ let transactionId = document.cookie.split('; ').find(row => row.startsWith('tran
 import WaveSurfer from '/vendor/wavesurfer/wavesurfer.js';
 import { parseTTML, mountTTMLRenderer } from './ttml-renderer.js';
 
+let notifyBtn = document.getElementById('subscribeNotifications');
 let downloadAuth = false;
 window.pointlessLoop = false;
 
@@ -378,6 +379,11 @@ const songs = document.querySelectorAll('.song-row > h2');
             if (document.querySelectorAll('.song-row > h2.blurred').length === 0) {
                 fadeOutGlow();
                 document.removeEventListener('mousemove', updateGlowVolume);
+                if ("Notification" in window) {
+                    if (Notification.permission !== "default") {
+                        notifyBtn.classList.remove('hidden');
+                    }
+                }
                 document.querySelector("title").textContent = `W Pull? | Loottox`;
             }
         }
@@ -672,5 +678,58 @@ document.addEventListener('keydown', (e) => {
     }
     if (e.ctrlKey && e.key.toUpperCase() === 'U') {
         e.preventDefault();
+    }
+});
+
+// --- Notification Registration ---
+
+const publicVapidKey = 'BNLBoN61qrU995Kcf6XGu4u23FB4yMsrFZVS9bnyubjcuZBFuHwYjbyrpf35LXvr6iJT1a0dzN7dzFzX3rx8HVc';
+
+notifyBtn.addEventListener('click', () => {
+    Notification.requestPermission((permission) => {
+        if (permission === "granted") {
+            notifyBtn.title = "";
+            notifyBtn.textContent = "All Set";
+            notifyBtn.disabled = true;
+            /*new Notification("You're all set!", {
+                body: "Ooh, your notification box is cozy. We'll flag you down when you're ready for a new pull!",
+                icon: "/icons/common_cover.png"
+            });*/
+            if ('serviceWorker' in navigator) {
+                sendSubscription().catch(err => console.error(err));
+            }
+        } else if (permission === "denied") {
+            notifyBtn.destroy();
+        }
+    });
+
+    function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+        for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
+    }
+
+    async function sendSubscription() {
+        const register = await navigator.serviceWorker.register('/worker.js', {
+            scope: '/'
+        });
+
+        const subscription = await register.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
+        });
+
+        await fetch('/subscribe-transaction-notification', {
+            method: 'POST',
+            body: JSON.stringify(subscription),
+            headers: {
+                'content-type': 'application/json'
+            }
+        });
     }
 });
