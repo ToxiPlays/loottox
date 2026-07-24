@@ -42,12 +42,6 @@
         "src": "ghost_town_stripped.mp3"
     },
     {
-        "title": "THREE HOMICIDES",
-        "description": "Featuring vocals from aurainairy and, well, *some* vocals from jun AKA songoat. It's very slightly unfinished but mostly there!\r\n\r\nDid you also know that it's a perfect loop?",
-        "rarity": "legendary",
-        "src": "three_homicides_demo_comp.mp3"
-    },
-    {
         "title": "wordle freestyle",
         "description": "Unchained freestyle released everywhere on June 5, 2026 to raise hype for the then-upcoming mixtape, THE WORLD IS YOURS. YouTube has a [lyric video](https://www.youtube.com/watch?v=qV4Co7C0PMo).\r\n\r\nMy greatest thanks to [Kyeler](https://genius.com/Kyeler) for providing the sync live on [Spicy Lyrics](https://spicylyrics.org). That's what you see to your right. I was NOT resyncing this from scratch.",
         "rarity": "common",
@@ -160,5 +154,11 @@
         "description": "Originally [posted to Twitter](https://x.com/toximixs/status/1896313124942418198?s=20) on March 2, 2025.\r\nRemastered and extended for Loottox.",
         "rarity": "common",
         "src": "double_up_source_loottox.mp3"
+    },
+    {
+        "title": "Keys To My Heart",
+        "description": "Self-produced emo electropop for the soul.\r\n\r\nCongratulations! You've pulled probably one of the best songs from <i>THE WORLD IS YOURS</i>.",
+        "rarity": "legendary",
+        "src": "keys_to_my_heart_pt_1.mp3"
     }
 ]
