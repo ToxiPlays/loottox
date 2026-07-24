@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="title" content="Inventory | Loottox">
+    <meta name="description" content="Have some downtime? Check out all the songs you've collected so far">
+    <meta name="keywords" content="music, gambling, gacha, streaming">
+    <meta name="robots" content="index, follow">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="language" content="English">
+    <meta name="author" content="toxi">
+    <meta name="robots" content="index, follow">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="language" content="English">
+    <meta name="author" content="toxi">
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="landing.css">
+    <link rel="stylesheet" href="inventory.css">
+    <link rel="icon" type="image/png" href="/icons/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/png" href="/icons/favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="/icons/favicon-16x16.png" sizes="16x16" />
+    <link rel="icon" type="image/png" href="/icons/favicon-128.png" sizes="128x128" />
+    <title>Inventory | Loottox</title>
+</head>
+<body>
+    <header>
+        <h1 class="home-link">LOOTTOX</h1>
+        <nav class="navigation">
+            <a href="/" id="home-link">Home</a>
+        </nav>
+        <p class="navigation">&copy; 2026 <a href="https://toxadil.com">Toxadil</a></p>
+    </header>
+    <main>
+        <div class="">
+            <p id="init-status">Waiting on server...</p>
+        </div>
+        <div class="unlocked-ctn">
+            <h1>Unlocked Songs</h1>
+            <div class="song-row expanded">
+                <h2 class="removed">%SONGNAME%</h2>
+                <div class="song-details">
+                    <div class="when-available hidden">
+                        <div class="wavesurfer"></div>
+                        <p class="description"></p>
+                        <p>You unlocked "%SONGNAME%" <abbr class="timestamp" title="ggg">3 hours ago</abbr>.</p>
+                    </div>
+                    <div class="when-offline">
+                        <p>You unlocked "%SONGNAME%" <abbr class="timestamp" title="ggg">3 hours ago</abbr>, but the server could not confirm that the song exists. The most likely scenario is that the song has been removed from the pool.</p>
+                        <p>You have the option of <strong>forgetting the song</strong> so that its memory is wiped forever. This cannot be undone.</p>
+                        <button class="btn">Forget %SONGNAME%</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="achievements-ctn">
+            <h1>Achievements</h1>
+        </div>
+    </main>
+</body>

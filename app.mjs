@@ -638,6 +638,18 @@ app.post('/api/postSong', upload.fields([
     }
 });
 
+app.get(('/404'), (req, res) => {
+    res.status(404).sendFile(path.join(import.meta.dirname, 'src', '404.html'));
+});
+
+app.get(('/403'), (req, res) => {
+    res.status(403).sendFile(path.join(import.meta.dirname, 'src', '403.html'));
+});
+
+app.get(('/inventory'), (req, res) => {
+    res.status(200).sendFile(path.join(import.meta.dirname, 'src', 'inventory.html'));
+});
+
 app.use(express.static('public'));
 app.use('/vendor/wavesurfer', express.static('./node_modules/wavesurfer.js/dist'));
 

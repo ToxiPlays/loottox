@@ -1,0 +1,19 @@
+.removed {
+    text-decoration: line-through;
+    opacity: 70%;
+}
+
+.unlocked-ctn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.song-row.expanded .song-details div {
+    width: 90%;
+}
+
+.wavesurfer {
+    width: 100% !important;
+}

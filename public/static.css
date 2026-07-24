@@ -1,0 +1,9 @@
+h1 {
+    cursor: pointer;
+    transition: .3s;
+}
+
+h1:hover,
+h1:focus {
+    opacity: 80%;
+}
