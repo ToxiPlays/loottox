@@ -473,7 +473,7 @@ app.post('/subscribe-transaction-notification', (req, res) => {
 
             res.status(201).json({ success: true });
 
-            const diffMs = ta.expiresAt - new Date();
+            const diffMs = new Date(ta.expiresAt) - new Date();
             const minutes = Math.floor(diffMs / (1000 * 60)) % 60;
             const hours = Math.floor(diffMs / (1000 * 60 * 60)) % 24;
 

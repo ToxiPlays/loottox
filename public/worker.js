@@ -6,7 +6,8 @@ self.addEventListener('push', e => {
       icon: '/icons/common_cover.png'
     }).then(() => {
       if (data.final) {
-        return self.registration.unregister();
+        return new Promise(resolve => setTimeout(resolve, 3000))
+          .then(() => self.registration.unregister());
       }
     })
   );

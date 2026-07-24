@@ -12,12 +12,14 @@ async function reflectExistingSubscription() {
     if (!reg) return;
     const existing = await reg.pushManager.getSubscription();
     if (existing) {
-        notifyBtn.title = "";
-        notifyBtn.textContent = "All Set";
-        notifyBtn.disabled = true;
+        return true;
+    } else {
+        return false;
     }
 }
-reflectExistingSubscription();
+
+let alreadySubscribed = false;
+alreadySubscribed = reflectExistingSubscription();
 
 function getCookie(name) {
     const match = document.cookie.split('; ').find(row => row.startsWith(name + '='));
@@ -393,7 +395,7 @@ const songs = document.querySelectorAll('.song-row > h2');
                 fadeOutGlow();
                 document.removeEventListener('mousemove', updateGlowVolume);
                 if ("Notification" in window) {
-                    if (Notification.permission !== "default") {
+                    if (Notification.permission !== "default" && alreadySubscribed === false) {
                         notifyBtn.classList.remove('hidden');
                     }
                 }
@@ -705,8 +707,9 @@ notifyBtn.addEventListener('click', () => {
             const existing = reg && await reg.pushManager.getSubscription();
             if (existing) {
                 notifyBtn.title = "";
-                notifyBtn.textContent = "Notifications Registered";
+                notifyBtn.textContent = "Already Registered";
                 notifyBtn.disabled = true;
+                notifyBtn.classList.remove('hidden');
                 return;
             }
         }
@@ -738,11 +741,13 @@ notifyBtn.addEventListener('click', () => {
     }
 
     async function sendSubscription() {
-        await navigator.serviceWorker.register('/worker.js', {
-            scope: '/'
-        });
-        
+        await navigator.serviceWorker.register('/worker.js', { scope: '/' });
         const register = await navigator.serviceWorker.ready;
+
+        const existing = await register.pushManager.getSubscription();
+        if (existing) {
+            await existing.unsubscribe();
+        }
 
         const subscription = await register.pushManager.subscribe({
             userVisibleOnly: true,
