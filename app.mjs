@@ -508,8 +508,10 @@ app.post('/subscribe-transaction-notification', (req, res) => {
                         .catch(err => console.error('Error sending follow-up notification:', err));
                     }, diffMs);
                 })
-                .catch(err => console.error('Error sending initial notification:', err));
-                ta.notifyArmed = false; // never actually got scheduled — allow a retry
+                .catch(err => {
+                    console.error('Error sending initial notification:', err);
+                    ta.notifyArmed = false; // never actually got scheduled — allow a retry
+                });
         } else {
             res.status(403).json({ success: false, error: result.message })
         }
