@@ -700,20 +700,23 @@ const publicVapidKey = 'BNLBoN61qrU995Kcf6XGu4u23FB4yMsrFZVS9bnyubjcuZBFuHwYjbyr
 
 notifyBtn.addEventListener('click', () => {
     if ('serviceWorker' in navigator) {
-        const reg = await navigator.serviceWorker.getRegistration('/');
-        const existing = reg && await reg.pushManager.getSubscription();
-        if (existing) {
-            notifyBtn.title = "";
-            notifyBtn.textContent = "All Set";
-            notifyBtn.disabled = true;
-            return;
+        async function scanForServiceWorkers() {
+            const reg = await navigator.serviceWorker.getRegistration('/');
+            const existing = reg && await reg.pushManager.getSubscription();
+            if (existing) {
+                notifyBtn.title = "";
+                notifyBtn.textContent = "Notifications Registered";
+                notifyBtn.disabled = true;
+                return;
+            }
         }
+        scanForServiceWorkers();
     }
 
     Notification.requestPermission((permission) => {
         if (permission === "granted") {
             notifyBtn.title = "";
-            notifyBtn.textContent = "All Set";
+            notifyBtn.textContent = "Notifications Registered";
             notifyBtn.disabled = true;
             if ('serviceWorker' in navigator) {
                 sendSubscription().catch(err => console.error(err));
@@ -735,9 +738,11 @@ notifyBtn.addEventListener('click', () => {
     }
 
     async function sendSubscription() {
-        const register = await navigator.serviceWorker.register('/worker.js', {
+        await navigator.serviceWorker.register('/worker.js', {
             scope: '/'
         });
+        
+        const register = await navigator.serviceWorker.ready;
 
         const subscription = await register.pushManager.subscribe({
             userVisibleOnly: true,
