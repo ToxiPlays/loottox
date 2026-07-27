@@ -9,7 +9,7 @@
 
 .forgotten {
     opacity: 20%;
-    transition: opacity 5s !important;
+    transition: opacity 2s !important;
 }
 
 .forgotten:hover,

@@ -1,4 +1,4 @@
-// preview-window.js
+// preview-window.mjs
 //
 // Ensures a song's mediaDictionary entry has a saved preview window,
 // computing it once via audioExcerpt.js and persisting it. Subsequent
@@ -7,33 +7,32 @@
 import { computeExcitingWindow } from './audio-excerpt.mjs';
 
 /**
- * @param {string} songName - key into mediaDictionary
- * @param {object} mediaDictionary - in-memory catalog, keyed by song name
- * @param {(dict: object) => Promise<void>} saveMediaDictionary - persists mediaDictionary
+ * Mutates `entry` in place (adding previewStart/previewEnd) and persists it.
+ * Works regardless of whether mediaDictionary is an array or a keyed object —
+ * you find the entry however your code already does, and pass it in along
+ * with the on-disk path to the actual audio file.
+ *
+ * @param {object} entry - the mediaDictionary record for this song (mutated in place)
+ * @param {string} filePath - path to the source audio file to analyze
+ * @param {(dict: any) => Promise<void>} saveMediaDictionary - persists mediaDictionary
+ *   (swap this for whatever you use — write to disk, KV.put, DB update, etc.)
+ * @param {any} mediaDictionary - the full dictionary, passed through to saveMediaDictionary
  * @param {number} [windowSeconds=17]
  * @returns {Promise<{ start: number, end: number }>}
  */
 export async function ensurePreviewWindow(
-  songName,
-  mediaDictionary,
+  entry,
+  filePath,
   saveMediaDictionary,
+  mediaDictionary,
   windowSeconds = 17,
 ) {
-  const entry = mediaDictionary[songName];
-  if (!entry) {
-    throw new Error(`Unknown song: ${songName}`);
-  }
-
   // Already computed — just reuse it.
   if (typeof entry.previewStart === 'number' && typeof entry.previewEnd === 'number') {
     return { start: entry.previewStart, end: entry.previewEnd };
   }
 
-  if (!entry.filePath) {
-    throw new Error(`mediaDictionary entry for "${songName}" has no filePath to analyze`);
-  }
-
-  const { start, end } = await computeExcitingWindow(entry.filePath, windowSeconds);
+  const { start, end } = await computeExcitingWindow(filePath, windowSeconds);
 
   entry.previewStart = start;
   entry.previewEnd = end;

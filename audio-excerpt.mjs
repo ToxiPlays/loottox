@@ -1,6 +1,7 @@
 // audioExcerpt.js
 // Deterministic "most exciting part" detector for previewSong.
 
+import ffmpegPath from 'ffmpeg-static';
 import { spawn } from 'child_process';
 
 const SAMPLE_RATE = 22050;
@@ -16,7 +17,7 @@ const BOUNDARY_SNAP_SECONDS = 1.5; // search radius when snapping cut points
 /** Decode any audio file to mono 16-bit PCM at SAMPLE_RATE, returned as Float32Array in [-1, 1]. */
 function decodeToPCM(filePath) {
   return new Promise((resolve, reject) => {
-    const ffmpeg = spawn('ffmpeg', [
+    const ffmpeg = spawn(ffmpegPath, [
       '-i', filePath,
       '-f', 's16le',
       '-ac', '1',

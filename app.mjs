@@ -7,9 +7,6 @@ import cryptoModule from 'crypto';
 import webpush from 'web-push';
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import ffmpeg from 'fluent-ffmpeg';
-import ffmpegPath from 'ffmpeg-static';
-ffmpeg.setFfmpegPath(ffmpegPath);
 
 const halfday = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
 const hour = 60 * 60 * 1000;
@@ -365,7 +362,7 @@ app.get('/api/getSong/:name', (req, res) => {
 });
 
 app.get('/api/previewSong/:name', async (req, res) => {
-    const { name } = req.params;
+    const name = req.params.name;
     const id = req.cookies.transactionId;
     try {
         const result = validateTransactionID(id);
@@ -376,20 +373,23 @@ app.get('/api/previewSong/:name', async (req, res) => {
             if (dictEntry && txEntry) {
                 return res.redirect(`/api/getSong/${encodeURIComponent(name)}`);
             }
-            // valid transaction, but doesn't cover this song — fall through to preview below
         }
-
-        const dictEntry = mediaDictionary.find(s => s.title === name);
-        if (!dictEntry) {
-            return res.status(404).json({ success: false, error: 'Song not found' });
-        }
-
-        const filePath = `./media/${dictEntry.rarity}/${dictEntry.src}`;
-        const window = await ensurePreviewWindow(dictEntry, filePath, async (dict) => fs.writeFile('./mediaDictionary.json', JSON.stringify(dict, null, 2)), mediaDictionary);
-        streamExcerpt(filePath, window.start, window.end, res);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        //res.status(500).json({ error: error.message });
     }
+
+    const dictEntry = mediaDictionary.find(s => s.title === name);
+    if (!dictEntry) {
+        return res.status(404).json({ success: false, error: 'Song not found' });
+    }
+
+    async function saveMediaDictionary() {
+        return true;
+    }
+
+    const filePath = `./media/${dictEntry.rarity}/${dictEntry.src}`;
+    const window = await ensurePreviewWindow(dictEntry, filePath, saveMediaDictionary, mediaDictionary);
+    streamExcerpt(filePath, window.start, window.end, res);
 });
 
 app.get('/api/getTtml/:name', (req, res) => {

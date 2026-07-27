@@ -44,15 +44,17 @@
                 <h2>%SONGNAME%</h2>
                 <div class="song-details">
                     <div class="when-available hidden">
-                        <p class="when-unlocked hidden"><strong>Congratulations!</strong> Since you unlocked this song today, you can listen to it here in its entirety.</p>
+                        <p class="when-unlocked hidden"><strong>Congratulations!</strong> Since you unlocked this song today, you get the full thing.</p>
+                        <p class="when-locked hidden"><strong>Generating preview...</strong> This may take a few seconds.</p>
                         <div class="wavesurfer"></div>
                         <p class="description"></p>
                         <p>You discovered "%SONGNAME%" <abbr class="timestamp" title="%FULLDATE%">%TIMEAGO%</abbr> with your %PULLNO% pull. You revealed this track %TRACKRATE%.</p>
                     </div>
                     <div class="when-offline hidden">
-                        <p>You unlocked "%SONGNAME%" <abbr class="timestamp" title="%FULLDATE%">%TIMEAGO%</abbr>, but the server could not confirm that the song exists. The most likely scenario is that the song has been removed from the pool.</p>
+                        <p>It seems like you unlocked "%SONGNAME%" <abbr class="timestamp" title="%FULLDATE%">%TIMEAGO%</abbr> during your %PULLNO% pull. The server wasn't able to confirm that this song exists.</p>
+                        <p>It might have been removed from the song pool. Copyright transfers/disputes and takedowns happen all the time in the music industry&mdash;don't be alarmed!</p>
                         <p>You have the option of <strong>forgetting the song</strong> so that its memory is wiped forever. This cannot be undone.</p>
-                        <button class="btn">Forget %SONGNAME%</button>
+                        <button title="You sure? There's no turning back" class="btn">Forget %SONGNAME%</button>
                     </div>
                 </div>
             </div>

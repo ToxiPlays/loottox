@@ -7,6 +7,7 @@
 //   window on mediaDictionary the first time it's requested.
 
 import { spawn } from 'child_process';
+import ffmpegPath from 'ffmpeg-static';
 import { ensurePreviewWindow } from './preview-window.mjs';
 
 const DEFAULT_PREVIEW_SECONDS = 17;
@@ -58,7 +59,7 @@ export function streamExcerpt(filePath, start, end, res) {
   res.setHeader('Content-Type', 'audio/mpeg');
   res.setHeader('Cache-Control', 'private, max-age=3600');
 
-  const ffmpeg = spawn('ffmpeg', [
+  const ffmpeg = spawn(ffmpegPath, [
     '-ss', String(start), // fast-ish seek; re-encoding below makes the cut sample-accurate
     '-i', filePath,
     '-t', duration,

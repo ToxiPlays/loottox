@@ -172,6 +172,13 @@ serverData = await getInventoryInfo();
 console.log('Server Data:', serverData);
 log(`Data retrieved! Server returned ${serverData.items.length} songs.`);
 
+if (serverData.items.length < 1) {
+    // The server returning no songs even though we have saved history by now suggests our local data is messed up
+    log('Wait, that shit say no songs 💀');
+    localStorage.clear();
+    document.location.replace("/404");
+}
+
 log("Displaying data...");
 
 let songTemplate = document.querySelector(".song-row.template");
@@ -269,7 +276,6 @@ songHistoryArray.forEach((savedSong) => {
             songRow.querySelector(".when-unlocked").classList.remove("hidden");
         }
         songRow.querySelector(".when-available").classList.remove("hidden");
-        // click handlers
 
         h2.addEventListener('click', () => {
             if (songRow.classList.contains('expanded')) {
@@ -320,6 +326,8 @@ songHistoryArray.forEach((savedSong) => {
                 if (!serverSong.unlocked) {
                     duration.classList.add("hidden");
                     time.classList.add("hidden");
+                    songRow.querySelector(".when-locked").classList.remove("hidden");
+                    waveform.parentElement.classList.add("hidden");
                 }
 
                 const wavesurfer = WaveSurfer.create({
@@ -350,7 +358,7 @@ songHistoryArray.forEach((savedSong) => {
                     }
 
                     navigator.mediaSession.metadata = new MediaMetadata({
-                        title: `${rarityIcon} ${serverSong.title}`,
+                        title: `${serverSong.unlocked ? rarityIcon : "🔒"} ${serverSong.title}`,
                         artist: 'ToxiPlays',
                         album: 'My Loottox Inventory',
                         artwork: [
@@ -415,12 +423,14 @@ songHistoryArray.forEach((savedSong) => {
                             position: 0
                         });
                     }
-                    window.pointlessLoop = true;
+                    if (!serverSong.unlocked) {
+                        songRow.querySelector(".when-locked").classList.add("hidden");
+                        waveform.parentElement.classList.remove("hidden");
+                    }
                 });
 
                 wavesurfer.on('timeupdate', (ct) => {
                     time.textContent = formatTime(ct);
-                    window.pointlessLoop = true;
                 });
             }
         });
@@ -428,7 +438,32 @@ songHistoryArray.forEach((savedSong) => {
         h2.classList.add("removed");
         h2.title = "We could not find this song";
         songRow.querySelector(".when-offline").classList.remove("hidden");
-        // click handlers
+        
+        h2.addEventListener("click", () => {
+            if (songRow.classList.contains("expanded")) {
+                songRow.classList.remove("expanded");
+                if (h2.classList.contains("forgotten")) {
+                    songRow.remove();
+                }
+            } else {
+                songRow.classList.add("expanded");
+            }
+        });
+
+        let forgetButton = songRow.querySelector(".when-offline > button.btn");
+        forgetButton.addEventListener("click", () => {
+            forgetButton.textContent = "Editing your memory";
+            let newArray = songHistoryArray.filter(obj => obj.title !== savedSong.title);
+            songHistoryArray = newArray;
+            songHistoryString = stringifyTracks(songHistoryArray);
+            localStorage.setItem('song-history', songHistoryString);
+            forgetButton.textContent = "Successfully forgotten";
+            forgetButton.disabled = true;
+            forgetButton.title = "";
+            h2.classList.add("forgotten");
+            h2.classList.remove("removed");
+            h2.title = "...just a burning memory";
+        })
     }
 
     document.querySelector(".unlocked-ctn").appendChild(songRow);
