@@ -1,6 +1,6 @@
 import { basic, standard } from './rates.mjs';
-import { ensurePreviewWindow } from './preview-window.js';
-import { streamExcerpt } from './preview-song-route.js';
+import { ensurePreviewWindow } from './preview-window.mjs';
+import { streamExcerpt } from './preview-song-route.mjs';
 import mediaDictionary from "./media/toc.json" with { type: "json" };
 import setDictionary from "./sets/toc.json" with { type: "json" };
 import cryptoModule from 'crypto';
@@ -8,7 +8,7 @@ import webpush from 'web-push';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import ffmpeg from 'fluent-ffmpeg';
-import ffmpegPath from 'ffmpeg-path';
+import ffmpegPath from 'ffmpeg-static';
 ffmpeg.setFfmpegPath(ffmpegPath);
 
 const halfday = 12 * 60 * 60 * 1000; // 12 hours in milliseconds

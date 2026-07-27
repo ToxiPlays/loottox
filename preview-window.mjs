@@ -4,7 +4,7 @@
 // computing it once via audioExcerpt.js and persisting it. Subsequent
 // calls for the same song are just a dictionary lookup.
 
-import { computeExcitingWindow } from './audio-wxcerpt.js';
+import { computeExcitingWindow } from './audio-excerpt.mjs';
 
 /**
  * @param {string} songName - key into mediaDictionary

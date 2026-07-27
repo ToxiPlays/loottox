@@ -7,7 +7,7 @@
 //   window on mediaDictionary the first time it's requested.
 
 import { spawn } from 'child_process';
-import { ensurePreviewWindow } from './preview-window.js';
+import { ensurePreviewWindow } from './preview-window.mjs';
 
 const DEFAULT_PREVIEW_SECONDS = 17;
 
@@ -52,7 +52,7 @@ export function previewSongHandler({ mediaDictionary, saveMediaDictionary, hasVa
 }
 
 /** Streams [start, end] seconds of filePath as MP3, re-encoding for accurate cut points. */
-function streamExcerpt(filePath, start, end, res) {
+export function streamExcerpt(filePath, start, end, res) {
   const duration = (end - start).toFixed(2);
 
   res.setHeader('Content-Type', 'audio/mpeg');
