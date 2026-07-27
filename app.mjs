@@ -1,9 +1,15 @@
 import { basic, standard } from './rates.mjs';
+import { ensurePreviewWindow } from './preview-window.js';
+import { streamExcerpt } from './preview-song-route.js';
 import mediaDictionary from "./media/toc.json" with { type: "json" };
+import setDictionary from "./sets/toc.json" with { type: "json" };
 import cryptoModule from 'crypto';
 import webpush from 'web-push';
 import bodyParser from 'body-parser';
 import cors from 'cors';
+import ffmpeg from 'fluent-ffmpeg';
+import ffmpegPath from 'ffmpeg-path';
+ffmpeg.setFfmpegPath(ffmpegPath);
 
 const halfday = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
 const hour = 60 * 60 * 1000;
@@ -353,6 +359,34 @@ app.get('/api/getSong/:name', (req, res) => {
         } else {
             res.status(403).json({ success: false, error: result.message })
         }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/api/previewSong/:name', async (req, res) => {
+    const { name } = req.params;
+    const id = req.cookies.transactionId;
+    try {
+        const result = validateTransactionID(id);
+        if (result.valid) {
+            const ta = transactions.get(id);
+            const dictEntry = mediaDictionary.find(s => s.title === name);
+            const txEntry = ta.items.find(s => s.title === name);
+            if (dictEntry && txEntry) {
+                return res.redirect(`/api/getSong/${encodeURIComponent(name)}`);
+            }
+            // valid transaction, but doesn't cover this song — fall through to preview below
+        }
+
+        const dictEntry = mediaDictionary.find(s => s.title === name);
+        if (!dictEntry) {
+            return res.status(404).json({ success: false, error: 'Song not found' });
+        }
+
+        const filePath = `./media/${dictEntry.rarity}/${dictEntry.src}`;
+        const window = await ensurePreviewWindow(dictEntry, filePath, async (dict) => fs.writeFile('./mediaDictionary.json', JSON.stringify(dict, null, 2)), mediaDictionary);
+        streamExcerpt(filePath, window.start, window.end, res);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
