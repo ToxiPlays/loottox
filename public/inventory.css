@@ -1,6 +1,20 @@
+* {
+    --unlocked-glow-radius: 28px;
+}
+
 .removed {
     text-decoration: line-through;
     opacity: 70%;
+}
+
+.forgotten {
+    opacity: 20%;
+    transition: opacity 5s !important;
+}
+
+.forgotten:hover,
+.forgotten:focus {
+    transform: translateY(0.2px) !important;
 }
 
 .unlocked-ctn {
@@ -12,8 +26,59 @@
 
 .song-row.expanded .song-details div {
     width: 90%;
+    text-align: center;
+}
+
+.description {
+    font-style: italic;
+    font-size: smaller;
+    opacity: 80%;
+    transition: 1s;
+}
+
+.description:hover {
+    opacity: 100%;
 }
 
 .wavesurfer {
-    width: 100% !important;
+    width: 56% !important;
+}
+
+.template {
+    display: none;
+}
+
+.song-row,
+.song-row.expanded {
+    height: inherit !important;
+    transition: height 0.8s ease-in-out !important;
+}
+
+.common.unlocked {
+    text-shadow: 0 0 var(--unlocked-glow-radius) var(--common);
+}
+
+.uncommon.unlocked {
+    text-shadow: 0 0 var(--unlocked-glow-radius) var(--uncommon);
+}
+
+.rare.unlocked {
+    text-shadow: 0 0 var(--unlocked-glow-radius) var(--rare);
+}
+
+.legendary.unlocked {
+    text-shadow: 0 0 var(--unlocked-glow-radius) var(--legendary);
+}
+
+span.material-symbols-outlined {
+    font-size: 1.7rem;
+    box-shadow: 0 0 3px 8px #0f0404;
+}
+
+.when-unlocked {
+    margin-top: -.5rem;
+}
+
+.description-link {
+    color: inherit;
 }

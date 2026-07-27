@@ -296,7 +296,7 @@ app.get('/standard_confirm/', (req, res) => {
         res.cookie('transactionId', nt.id, { httpOnly: false, maxAge: halfday }); 
         res.redirect("/");
     } else {
-        res.status(403).send("erm...");
+        res.status(403).sendFile(path.join(import.meta.dirname, 'src', '403.html'));
     }
 });
 
@@ -307,7 +307,7 @@ app.get('/ultra_confirm/', (req, res) => {
         res.cookie('transactionId', nt.id, { httpOnly: false, maxAge: halfday }); 
         res.redirect("/");
     } else {
-        res.status(403).send("erm...");
+        res.status(403).sendFile(path.join(import.meta.dirname, 'src', '403.html'));
     }
 });
 
@@ -386,6 +386,58 @@ app.get('/api/getTtml/:name', (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
+app.get('/api/inventory-check-in', (req, res) => {
+    const historyString = req.query.save;
+    const id = req.cookies.transactionId;
+    function parseTrackString(str) {
+        return str
+            .split('|')
+            .filter(Boolean)
+            .map(entry => {
+            const parts = entry.split(':');
+            const [time, tx, order] = parts.slice(-3).map(Number);
+            const title = parts.slice(0, -3).join(':');
+            return { title, time, tx, order };
+            });
+    }
+    let authenticatedTitles = [];
+    try {
+        const result = validateTransactionID(id);
+        if (result.valid) {
+            const ta = transactions.get(id);
+            ta.items.forEach((song) => {
+                authenticatedTitles.push(song.title);
+            });
+        }
+    } catch (error) {
+        // no valid transaction, continue processing the request anyway
+    }
+
+    let historyArray = parseTrackString(historyString);
+    let response = { success: true };
+
+    // populate response.items with { title: ..., rarity: ..., unlocked: boolean } based on mediaDictionary/authenticatedTitles
+    response.items = [];
+    historyArray.forEach((song) => {
+        let txSong = mediaDictionary.find(s2 => s2.title === song.title);
+        if (txSong) {
+            let unlock = authenticatedTitles.includes(song.title);
+            response.items.push({
+                title: txSong.title,
+                description: txSong.description,
+                rarity: txSong.rarity,
+                unlocked: unlock
+            });
+        }
+    });
+
+    //TO-DO: achievement completion here in response.sets
+    //{ name: xxx, icon: xxx, completion: 0-1 }
+    response.sets = [];
+
+    res.status(200).json(response);
+})
 
 app.get('/api/can-download', (req, res) => {
     const encryptedKey = req.cookies.downloadKey;
@@ -530,7 +582,7 @@ app.get('/admin', (req, res) => {
     if (isAdminIp(req)) {
         res.sendFile(path.resolve('src/admin.html'));
     } else {
-        res.status(403).json({ success: false, error: "Access denied." });
+         res.status(403).sendFile(path.join(import.meta.dirname, 'src', '403.html'));
     }
 });
 
@@ -538,11 +590,10 @@ app.get('/admin/rig', (req, res) => {
     if (isAdminIp(req)) {
         res.sendFile(path.resolve('src/rig.html'));
     } else {
-        res.status(403).json({ success: false, error: "Access denied." });
+         res.status(403).sendFile(path.join(import.meta.dirname, 'src', '403.html'));
     }
 });
 
-// Returns the full song list (with rarities) for the rig picker UI.
 app.get('/api/admin/songs', (req, res) => {
     if (!isAdminIp(req)) {
         return res.status(403).json({ success: false, error: "Access denied." });
@@ -550,8 +601,6 @@ app.get('/api/admin/songs', (req, res) => {
     res.status(200).json(mediaDictionary);
 });
 
-// Creates an ULTRA transaction whose 5 items are exactly the titles the
-// admin selected, instead of the normal randomized pull.
 app.post('/api/admin/rig_confirm', express.json(), (req, res) => {
     if (!isAdminIp(req)) {
         return res.status(403).json({ success: false, error: "Access denied." });

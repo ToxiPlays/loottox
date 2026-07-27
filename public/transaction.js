@@ -1,10 +1,17 @@
 let transactionId = document.cookie.split('; ').find(row => row.startsWith('transactionId=')).split('=')[1];
 import WaveSurfer from '/vendor/wavesurfer/wavesurfer.js';
 import { parseTTML, mountTTMLRenderer } from './ttml-renderer.js';
+import { parseTrackString, stringifyTracks } from "./history-helpers.js";
 
 let notifyBtn = document.getElementById('subscribeNotifications');
 let downloadAuth = false;
 window.pointlessLoop = false;
+
+let savedTxTicker = Number(localStorage.getItem("tx-index"));
+if (!savedTxTicker) { savedTxTicker = 0 };
+savedTxTicker++;
+localStorage.setItem("tx-index", savedTxTicker.toString());
+let savedTrackTicker = 0;
 
 async function reflectExistingSubscription() {
     if (!('serviceWorker' in navigator)) return;
@@ -400,6 +407,21 @@ const songs = document.querySelectorAll('.song-row > h2');
                     }
                 }
                 document.querySelector("title").textContent = `W Pull? | Loottox`;
+            }
+
+            savedTrackTicker++;
+            let existingHistory = localStorage.getItem("song-history") ?? "";
+            if (existingHistory.includes(song.textContent)) {
+                // Song already logged - do nothing
+            } else {
+                let songHistory = parseTrackString(existingHistory);
+                songHistory.push({
+                    title: song.textContent,
+                    time: Date.now(),
+                    tx: savedTxTicker,
+                    order: savedTrackTicker
+                });
+                localStorage.setItem("song-history", stringifyTracks(songHistory));
             }
         }
         else {

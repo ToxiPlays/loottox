@@ -26,3 +26,10 @@ document.getElementById("standard-btn").addEventListener("click", () => {
 document.getElementById("ultra-btn").addEventListener("click", () => {
     window.location.href = "/buy/ultra";
 });
+
+if (localStorage.getItem("song-history")) {
+    let a = document.createElement("a");
+    a.href = "/inventory";
+    a.textContent = "Inventory";
+    document.querySelector("nav.navigation").appendChild(a);
+}

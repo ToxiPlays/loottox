@@ -21,6 +21,8 @@
     <link rel="icon" type="image/png" href="/icons/favicon-32x32.png" sizes="32x32" />
     <link rel="icon" type="image/png" href="/icons/favicon-16x16.png" sizes="16x16" />
     <link rel="icon" type="image/png" href="/icons/favicon-128.png" sizes="128x128" />
+    <script src="inventory.js" type="module" defer></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=lock_open" />
     <title>Inventory | Loottox</title>
 </head>
 <body>
@@ -33,27 +35,29 @@
     </header>
     <main>
         <div class="">
-            <p id="init-status">Waiting on server...</p>
+            <p id="debug-status">Waiting on client...</p>
         </div>
-        <div class="unlocked-ctn">
+        <div class="fake-ctn hidden"></div>
+        <div class="unlocked-ctn hidden">
             <h1>Unlocked Songs</h1>
-            <div class="song-row expanded">
-                <h2 class="removed">%SONGNAME%</h2>
+            <div class="song-row template">
+                <h2>%SONGNAME%</h2>
                 <div class="song-details">
                     <div class="when-available hidden">
+                        <p class="when-unlocked hidden"><strong>Congratulations!</strong> Since you unlocked this song today, you can listen to it here in its entirety.</p>
                         <div class="wavesurfer"></div>
                         <p class="description"></p>
-                        <p>You unlocked "%SONGNAME%" <abbr class="timestamp" title="ggg">3 hours ago</abbr>.</p>
+                        <p>You discovered "%SONGNAME%" <abbr class="timestamp" title="%FULLDATE%">%TIMEAGO%</abbr> with your %PULLNO% pull. You revealed this track %TRACKRATE%.</p>
                     </div>
-                    <div class="when-offline">
-                        <p>You unlocked "%SONGNAME%" <abbr class="timestamp" title="ggg">3 hours ago</abbr>, but the server could not confirm that the song exists. The most likely scenario is that the song has been removed from the pool.</p>
+                    <div class="when-offline hidden">
+                        <p>You unlocked "%SONGNAME%" <abbr class="timestamp" title="%FULLDATE%">%TIMEAGO%</abbr>, but the server could not confirm that the song exists. The most likely scenario is that the song has been removed from the pool.</p>
                         <p>You have the option of <strong>forgetting the song</strong> so that its memory is wiped forever. This cannot be undone.</p>
                         <button class="btn">Forget %SONGNAME%</button>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="achievements-ctn">
+        <div class="achievements-ctn hidden">
             <h1>Achievements</h1>
         </div>
     </main>
