@@ -612,9 +612,75 @@ function isAdminIp(req) {
     return req.ip.includes('192.168.1.') || req.ip.includes('127.0.0.1');
 }
 
+function slugify(name) {
+    return String(name)
+        .trim()
+        .toLowerCase()
+        .replace(/['"]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '') || 'set';
+}
+
+function readSetsToc() {
+    try {
+        return JSON.parse(fs.readFileSync(path.resolve('./sets/toc.json'), 'utf8'));
+    } catch {
+        return [];
+    }
+}
+
+function writeSetsToc(toc) {
+    fs.mkdirSync(path.resolve('./sets'), { recursive: true });
+    fs.writeFileSync(path.resolve('./sets/toc.json'), JSON.stringify(toc, null, 4), 'utf8');
+}
+
+function readMediaToc() {
+    try {
+        return JSON.parse(fs.readFileSync(path.resolve('./media/toc.json'), 'utf8'));
+    } catch {
+        return [];
+    }
+}
+
+function writeMediaToc(toc) {
+    fs.writeFileSync(path.resolve('./media/toc.json'), JSON.stringify(toc, null, 4), 'utf8');
+}
+
+function uniqueSlug(base, toc, excludeSlug = null) {
+    const taken = new Set(toc.filter(s => s.slug !== excludeSlug).map(s => s.slug));
+    if (!taken.has(base)) return base;
+    let i = 2;
+    while (taken.has(`${base}-${i}`)) i++;
+    return `${base}-${i}`;
+}
+
+function syncSongSetMembership(mediaToc, slug, titles) {
+    const wanted = new Set(titles);
+    for (const song of mediaToc) {
+        const has = Array.isArray(song.sets) && song.sets.includes(slug);
+        const shouldHave = wanted.has(song.title);
+        if (shouldHave && !has) {
+            if (!Array.isArray(song.sets)) song.sets = [];
+            song.sets.push(slug);
+        } else if (!shouldHave && has) {
+            song.sets = song.sets.filter(s => s !== slug);
+            if (song.sets.length === 0) delete song.sets;
+        }
+    }
+    return mediaToc;
+}
+
 app.get('/admin', (req, res) => {
     if (isAdminIp(req)) {
         res.sendFile(path.resolve('src/admin.html'));
+    } else {
+         res.status(403).sendFile(path.join(import.meta.dirname, 'src', '403.html'));
+    }
+});
+
+app.get('/admin/sets', (req, res) => {
+    if (isAdminIp(req)) {
+        res.sendFile(path.resolve('src/admin-sets.html'));
     } else {
          res.status(403).sendFile(path.join(import.meta.dirname, 'src', '403.html'));
     }
@@ -721,6 +787,131 @@ app.post('/api/postSong', upload.fields([
     }
 });
 
+app.get('/api/admin/sets', (req, res) => {
+    if (!isAdminIp(req)) {
+        return res.status(403).json({ success: false, error: "Access denied." });
+    }
+    res.status(200).json(readSetsToc());
+});
+
+app.get('/api/admin/sets/:slug', (req, res) => {
+    if (!isAdminIp(req)) {
+        return res.status(403).json({ success: false, error: "Access denied." });
+    }
+    const set = readSetsToc().find(s => s.slug === req.params.slug);
+    if (!set) return res.status(404).json({ success: false, error: "Set not found." });
+
+    const songTitles = readMediaToc()
+        .filter(song => Array.isArray(song.sets) && song.sets.includes(set.slug))
+        .map(song => song.title);
+
+    res.status(200).json({ ...set, songTitles });
+});
+
+app.post('/api/admin/sets', upload.single('icon'), (req, res) => {
+    if (!isAdminIp(req)) {
+        return res.status(403).json({ success: false, error: "Access denied." });
+    }
+    try {
+        const { name, description = '' } = req.body;
+        if (!name?.trim()) {
+            return res.status(400).json({ success: false, error: "Name is required." });
+        }
+        if (!req.file) {
+            return res.status(400).json({ success: false, error: "An icon image is required." });
+        }
+
+        let songTitles = [];
+        try {
+            songTitles = JSON.parse(req.body.songs || '[]');
+            if (!Array.isArray(songTitles)) throw new Error();
+        } catch {
+            return res.status(400).json({ success: false, error: "Invalid songs list." });
+        }
+
+        const setsToc = readSetsToc();
+        const slug = uniqueSlug(slugify(name), setsToc);
+
+        const iconDir = path.resolve('./sets/icons');
+        fs.mkdirSync(iconDir, { recursive: true });
+        const ext = path.extname(req.file.originalname) || '.png';
+        const iconFilename = `${slug}${ext}`;
+        fs.writeFileSync(path.join(iconDir, iconFilename), req.file.buffer);
+
+        setsToc.push({
+            name: name.trim(),
+            description: description.trim(),
+            icon: iconFilename,
+            slug,
+        });
+        writeSetsToc(setsToc);
+
+        const mediaToc = readMediaToc();
+        syncSongSetMembership(mediaToc, slug, songTitles);
+        writeMediaToc(mediaToc);
+
+        res.status(200).json({ success: true, slug });
+    } catch (err) {
+        console.error('[createSet]', err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+app.put('/api/admin/sets/:slug', upload.single('icon'), (req, res) => {
+    if (!isAdminIp(req)) {
+        return res.status(403).json({ success: false, error: "Access denied." });
+    }
+    try {
+        const setsToc = readSetsToc();
+        const set = setsToc.find(s => s.slug === req.params.slug);
+        if (!set) return res.status(404).json({ success: false, error: "Set not found." });
+
+        const { name, description = '' } = req.body;
+        if (!name?.trim()) {
+            return res.status(400).json({ success: false, error: "Name is required." });
+        }
+
+        let songTitles = null;
+        if (req.body.songs !== undefined) {
+            try {
+                songTitles = JSON.parse(req.body.songs);
+                if (!Array.isArray(songTitles)) throw new Error();
+            } catch {
+                return res.status(400).json({ success: false, error: "Invalid songs list." });
+            }
+        }
+
+        set.name = name.trim();
+        set.description = description.trim();
+
+        if (req.file) {
+            const iconDir = path.resolve('./sets/icons');
+            fs.mkdirSync(iconDir, { recursive: true });
+            if (set.icon) {
+                const oldPath = path.join(iconDir, set.icon);
+                fs.unlink(oldPath, () => {});
+            }
+            const ext = path.extname(req.file.originalname) || '.png';
+            const iconFilename = `${set.slug}${ext}`;
+            fs.writeFileSync(path.join(iconDir, iconFilename), req.file.buffer);
+            set.icon = iconFilename;
+        }
+
+        writeSetsToc(setsToc);
+
+        if (songTitles !== null) {
+            const mediaToc = readMediaToc();
+            syncSongSetMembership(mediaToc, set.slug, songTitles);
+            writeMediaToc(mediaToc);
+        }
+
+        res.status(200).json({ success: true, slug: set.slug });
+    } catch (err) {
+        console.error('[editSet]', err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 app.get(('/404'), (req, res) => {
     res.status(404).sendFile(path.join(import.meta.dirname, 'src', '404.html'));
 });
@@ -735,6 +926,7 @@ app.get(('/inventory'), (req, res) => {
 
 app.use(express.static('public'));
 app.use('/vendor/wavesurfer', express.static('./node_modules/wavesurfer.js/dist'));
+app.use('/sets/icons', express.static(path.resolve('./sets/icons')));
 
 if (!process.env.VERCEL) {
   app.listen(port, () => {

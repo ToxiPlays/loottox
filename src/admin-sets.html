@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sets — Loottox Admin</title>
+<style>
+  :root{
+    --bg: #0e1013;
+    --panel: #16191f;
+    --panel-2: #1c2029;
+    --line: #2a2f3a;
+    --text: #e9e7e2;
+    --muted: #8b8f9c;
+    --gold: #d4a03c;
+    --gold-bright: #eab654;
+    --danger: #d9584a;
+    --common: #9aa0ab;
+    --uncommon: #4fae7c;
+    --rare: #4a90d9;
+    --legendary: #b478e6;
+    --radius: 10px;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 500px at 15% -10%, rgba(212,160,60,0.07), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .topbar{
+    position:sticky; top:0; z-index:20;
+    background:rgba(14,16,19,0.9);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .topbar-inner{
+    max-width:1180px; margin:0 auto;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 24px;
+  }
+  .brand{ display:flex; align-items:baseline; gap:10px; }
+  .brand-mark{
+    font-weight:800; letter-spacing:0.14em; font-size:14px;
+    color:var(--gold-bright);
+  }
+  .brand-sub{ color:var(--muted); font-size:14px; }
+
+  main{ max-width:1180px; margin:0 auto; padding:28px 24px 80px; }
+
+  h1.page-title{
+    font-size:26px; font-weight:800; letter-spacing:-0.01em; margin:0 0 4px;
+  }
+  .page-sub{ color:var(--muted); margin:0 0 26px; font-size:14.5px; }
+
+  .btn{
+    appearance:none; border:1px solid var(--line); background:var(--panel-2);
+    color:var(--text); padding:9px 16px; border-radius:8px; font-size:14px;
+    font-weight:600; cursor:pointer; transition:border-color .15s, background .15s, transform .04s;
+  }
+  .btn:hover{ border-color:#3a4152; }
+  .btn:active{ transform:translateY(1px); }
+  .btn-primary{
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold));
+    border-color:transparent; color:#231a05;
+  }
+  .btn-primary:hover{ filter:brightness(1.05); }
+  .btn-primary:disabled{ opacity:0.5; cursor:not-allowed; filter:none; }
+  .btn-ghost{ background:transparent; }
+  .btn-secondary{ background:var(--panel); }
+
+  .grid{
+    display:grid; gap:16px;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  }
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+    overflow:hidden; display:flex; flex-direction:column; cursor:pointer;
+    transition:border-color .15s, transform .1s;
+  }
+  .card:hover{ border-color:#3d4457; transform:translateY(-1px); }
+  .card-cover{
+    aspect-ratio:1/1; width:100%; background:var(--panel-2);
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+  }
+  .card-cover img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .card-cover .no-cover{ color:var(--muted); font-size:12px; }
+  .card-body{ padding:12px 14px 14px; display:flex; flex-direction:column; gap:4px; flex:1; }
+  .card-name{ font-weight:700; font-size:15px; line-height:1.3; }
+  .card-desc{
+    color:var(--muted); font-size:13px; line-height:1.4;
+    display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+    min-height:2.6em;
+  }
+  .card-meta{
+    margin-top:auto; padding-top:8px; display:flex; align-items:center; justify-content:space-between;
+    font-size:12px; color:var(--muted);
+  }
+  .card-meta .slug{ font-family:ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+  .empty{ color:var(--muted); text-align:center; padding:60px 0; }
+
+  /* Overlay editor */
+  .overlay{
+    position:fixed; inset:0; background:rgba(6,7,9,0.7);
+    display:flex; align-items:center; justify-content:center; z-index:50; padding:20px;
+  }
+  .editor{
+    width:100%; max-width:900px; max-height:92vh;
+    background:var(--panel); border:1px solid var(--line); border-radius:14px;
+    display:flex; flex-direction:column; overflow:hidden;
+  }
+  .editor-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 22px; border-bottom:1px solid var(--line);
+  }
+  .editor-head h2{ margin:0; font-size:18px; }
+  .icon-btn{
+    background:none; border:none; color:var(--muted); font-size:22px; line-height:1;
+    cursor:pointer; padding:4px 8px; border-radius:6px;
+  }
+  .icon-btn:hover{ color:var(--text); background:var(--panel-2); }
+
+  .editor-body{
+    display:grid; grid-template-columns: 320px 1fr; gap:24px;
+    padding:20px 22px; overflow-y:auto;
+  }
+  @media (max-width: 680px){
+    .editor-body{ grid-template-columns:1fr; }
+  }
+
+  .field{ display:block; margin-bottom:16px; }
+  .field-label{ display:block; font-size:12.5px; font-weight:700; letter-spacing:0.03em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+  .field-label .optional{ text-transform:none; font-weight:400; letter-spacing:0; color:#666c79; }
+  input[type=text], textarea{
+    width:100%; background:var(--panel-2); border:1px solid var(--line); color:var(--text);
+    border-radius:8px; padding:9px 11px; font-size:14px; font-family:inherit; resize:vertical;
+  }
+  input[type=text]:focus, textarea:focus{ outline:none; border-color:var(--gold); }
+  .slug-preview{
+    font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:13px;
+    color:var(--gold-bright); background:var(--panel-2); border:1px solid var(--line);
+    border-radius:8px; padding:9px 11px;
+  }
+
+  .cropper-viewport{
+    width:100%; aspect-ratio:1/1; max-width:280px; margin:0 auto;
+    background:repeating-conic-gradient(#20242c 0% 25%, #191c22 0% 50%) 0 0/20px 20px;
+    border-radius:8px; border:1px solid var(--line); overflow:hidden; position:relative;
+    touch-action:none; cursor:grab;
+  }
+  .cropper-viewport:active{ cursor:grabbing; }
+  .cropper-viewport img{
+    position:absolute; left:0; top:0; user-select:none; pointer-events:none;
+  }
+  .cropper-placeholder{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    color:var(--muted); font-size:12.5px; text-align:center; padding:20px;
+  }
+  .cropper-controls{ max-width:280px; margin:10px auto 0; }
+  .cropper-controls input[type=range]{ width:100%; accent-color:var(--gold); }
+  .cropper-actions{
+    max-width:280px; margin:12px auto 0; display:flex; flex-direction:column; align-items:center; gap:6px;
+  }
+  .hint{ color:var(--muted); font-size:12px; text-align:center; }
+
+  .field-label-row{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:6px; }
+  .song-count{ font-size:12px; color:var(--gold-bright); font-weight:600; }
+  .song-filter{ margin-bottom:8px; }
+  .song-list{
+    border:1px solid var(--line); border-radius:8px; background:var(--panel-2);
+    max-height:360px; overflow-y:auto;
+  }
+  .song-row{
+    display:flex; align-items:center; gap:10px; padding:9px 12px;
+    border-bottom:1px solid var(--line); font-size:13.5px;
+  }
+  .song-row:last-child{ border-bottom:none; }
+  .song-row:hover{ background:rgba(255,255,255,0.02); }
+  .song-row input{ accent-color:var(--gold); width:16px; height:16px; flex-shrink:0; }
+  .song-row label{ flex:1; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .song-title{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .rarity-tag{
+    font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;
+    padding:2px 7px; border-radius:999px; flex-shrink:0;
+  }
+  .rarity-common{ color:var(--common); background:rgba(154,160,171,0.12); }
+  .rarity-uncommon{ color:var(--uncommon); background:rgba(79,174,124,0.12); }
+  .rarity-rare{ color:var(--rare); background:rgba(74,144,217,0.12); }
+  .rarity-legendary{ color:var(--legendary); background:rgba(180,120,230,0.12); }
+  .song-list-empty{ padding:20px; text-align:center; color:var(--muted); font-size:13px; }
+
+  .editor-foot{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:16px 22px; border-top:1px solid var(--line); background:var(--panel);
+  }
+  .editor-foot-actions{ display:flex; gap:10px; margin-left:auto; }
+  .error{ color:var(--danger); font-size:13px; }
+
+  .toast{
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+    background:var(--panel-2); border:1px solid var(--line); color:var(--text);
+    padding:11px 18px; border-radius:8px; font-size:13.5px; z-index:100;
+    opacity:0; pointer-events:none; transition:opacity .2s, transform .2s;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(-4px); }
+  .toast.error{ border-color:#5a2a24; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><span class="brand-mark">LOOTTOX</span><span class="brand-sub">Admin · Sets</span></div>
+    <button id="newSetBtn" class="btn btn-primary">+ New set</button>
+  </div>
+</header>
+
+<main>
+  <h1 class="page-title">Sets</h1>
+  <p class="page-sub">Curated groupings of songs. Each set gets its own square cover image and a slug generated from its name.</p>
+
+  <div id="setsGrid" class="grid"></div>
+  <p id="emptyState" class="empty" hidden>No sets yet — create one to get started.</p>
+</main>
+
+<div id="overlay" class="overlay" hidden>
+  <div class="editor">
+    <div class="editor-head">
+      <h2 id="editorTitle">New set</h2>
+      <button id="closeEditor" class="icon-btn" aria-label="Close">×</button>
+    </div>
+
+    <div class="editor-body">
+      <div class="editor-col-left">
+        <label class="field">
+          <span class="field-label">Name</span>
+          <input id="fieldName" type="text" maxlength="120" placeholder="e.g. Midnight Rain">
+        </label>
+
+        <label class="field">
+          <span class="field-label">Description <span class="optional">optional</span></span>
+          <textarea id="fieldDescription" rows="3" maxlength="500" placeholder="What's this set about?"></textarea>
+        </label>
+
+        <div class="field">
+          <span class="field-label">Slug</span>
+          <div id="slugPreview" class="slug-preview">—</div>
+        </div>
+
+        <div class="field">
+          <span class="field-label">Cover image</span>
+          <div class="cropper-viewport" id="cropViewport">
+            <img id="cropImage" alt="" draggable="false" hidden>
+            <div class="cropper-placeholder" id="cropPlaceholder"><span>No image selected</span></div>
+          </div>
+          <div class="cropper-controls" id="cropControls" hidden>
+            <input type="range" id="zoomRange" min="1" max="3" step="0.01" value="1">
+          </div>
+          <input type="file" id="fileInput" accept="image/*" hidden>
+          <div class="cropper-actions">
+            <button type="button" id="pickImageBtn" class="btn btn-secondary">Choose image</button>
+            <span id="currentIconNote" class="hint" hidden>Choosing a new image will replace the current cover.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="editor-col-right">
+        <div class="field-label-row">
+          <span class="field-label">Songs in this set</span>
+          <span id="songCount" class="song-count">0 selected</span>
+        </div>
+        <input type="text" id="songFilter" class="song-filter" placeholder="Filter songs…">
+        <div id="songList" class="song-list"></div>
+      </div>
+    </div>
+
+    <div class="editor-foot">
+      <span id="editorError" class="error" hidden></span>
+      <div class="editor-foot-actions">
+        <button type="button" id="cancelEditor" class="btn btn-ghost">Cancel</button>
+        <button type="button" id="saveEditor" class="btn btn-primary">Save set</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+(() => {
+  const VP = 280;          // crop viewport size, px (must match CSS)
+  const OUTPUT = 512;       // exported cover image size, px
+
+  let sets = [];
+  let songs = [];
+  let editingSlug = null;
+  let newImageChosen = false;
+
+  // crop state
+  let natW = 0, natH = 0, baseScale = 1, scale = 1, offX = 0, offY = 0;
+  let dragging = false, dragStart = null, offStart = null;
+
+  const $ = (id) => document.getElementById(id);
+  const setsGrid = $('setsGrid');
+  const emptyState = $('emptyState');
+  const overlay = $('overlay');
+  const editorTitle = $('editorTitle');
+  const fieldName = $('fieldName');
+  const fieldDescription = $('fieldDescription');
+  const slugPreview = $('slugPreview');
+  const cropViewport = $('cropViewport');
+  const cropImage = $('cropImage');
+  const cropPlaceholder = $('cropPlaceholder');
+  const cropControls = $('cropControls');
+  const zoomRange = $('zoomRange');
+  const fileInput = $('fileInput');
+  const pickImageBtn = $('pickImageBtn');
+  const currentIconNote = $('currentIconNote');
+  const songFilter = $('songFilter');
+  const songList = $('songList');
+  const songCount = $('songCount');
+  const editorError = $('editorError');
+  const toast = $('toast');
+
+  function slugify(name) {
+    return (name || '').trim().toLowerCase()
+      .replace(/['"]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
+  function showToast(message, isError) {
+    toast.textContent = message;
+    toast.classList.toggle('error', !!isError);
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2600);
+  }
+
+  function rarityOf(song) {
+    return (song.rarity || 'common').toLowerCase();
+  }
+
+  // ---------- Data loading ----------
+
+  async function loadAll() {
+    const [setsRes, songsRes] = await Promise.all([
+      fetch('/api/admin/sets'),
+      fetch('/api/admin/songs'),
+    ]);
+    if (!setsRes.ok || !songsRes.ok) {
+      showToast('Failed to load admin data — are you on an admin IP?', true);
+      return;
+    }
+    sets = await setsRes.json();
+    songs = await songsRes.json();
+    renderGrid();
+  }
+
+  function countInSet(slug) {
+    return songs.filter(s => Array.isArray(s.sets) && s.sets.includes(slug)).length;
+  }
+
+  function renderGrid() {
+    setsGrid.innerHTML = '';
+    emptyState.hidden = sets.length > 0;
+    for (const set of sets) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="card-cover">
+          ${set.icon ? `<img src="/sets/icons/${encodeURIComponent(set.icon)}" alt="">` : `<span class="no-cover">No cover</span>`}
+        </div>
+        <div class="card-body">
+          <div class="card-name"></div>
+          <div class="card-desc"></div>
+          <div class="card-meta">
+            <span class="slug"></span>
+            <span></span>
+          </div>
+        </div>
+      `;
+      card.querySelector('.card-name').textContent = set.name;
+      card.querySelector('.card-desc').textContent = set.description || '';
+      card.querySelector('.slug').textContent = set.slug;
+      card.querySelector('.card-meta span:last-child').textContent = `${countInSet(set.slug)} song${countInSet(set.slug) === 1 ? '' : 's'}`;
+      card.addEventListener('click', () => openEditor(set.slug));
+      setsGrid.appendChild(card);
+    }
+  }
+
+  // ---------- Song checklist ----------
+
+  function renderSongList(checkedTitles) {
+    const checked = new Set(checkedTitles);
+    const filter = songFilter.value.trim().toLowerCase();
+    const filtered = songs.filter(s => !filter || s.title.toLowerCase().includes(filter));
+
+    if (filtered.length === 0) {
+      songList.innerHTML = '<div class="song-list-empty">No songs match.</div>';
+    } else {
+      songList.innerHTML = '';
+      for (const song of filtered) {
+        const row = document.createElement('div');
+        row.className = 'song-row';
+        const id = 'song-' + btoa(unescape(encodeURIComponent(song.title))).replace(/[^a-zA-Z0-9]/g, '');
+        row.innerHTML = `
+          <input type="checkbox" id="${id}" data-title="${song.title.replace(/"/g, '&quot;')}">
+          <label for="${id}">
+            <span class="song-title"></span>
+            <span class="rarity-tag rarity-${rarityOf(song)}"></span>
+          </label>
+        `;
+        row.querySelector('.song-title').textContent = song.title;
+        row.querySelector('.rarity-tag').textContent = rarityOf(song);
+        const cb = row.querySelector('input');
+        cb.checked = checked.has(song.title);
+        cb.addEventListener('change', updateSongCount);
+        songList.appendChild(row);
+      }
+    }
+    updateSongCount();
+  }
+
+  function getCheckedTitles() {
+    return Array.from(songList.querySelectorAll('input[type=checkbox]:checked')).map(cb => cb.dataset.title);
+  }
+
+  function updateSongCount() {
+    // Count across the *whole* list, not just the filtered view — checked
+    // state persists in the DOM for rows currently rendered, so re-render
+    // preserves it; here we just report what's visibly checked right now.
+    const n = getCheckedTitles().length;
+    songCount.textContent = `${n} selected`;
+  }
+
+  songFilter.addEventListener('input', () => {
+    // preserve current check state across re-filtering
+    const checked = getCheckedTitles();
+    renderSongList(checked);
+  });
+
+  // ---------- Cropper ----------
+
+  function resetCropper() {
+    natW = natH = 0; scale = baseScale = 1; offX = offY = 0;
+    newImageChosen = false;
+    cropImage.hidden = true;
+    cropImage.removeAttribute('src');
+    cropPlaceholder.hidden = false;
+    cropControls.hidden = true;
+    zoomRange.value = 1;
+  }
+
+  function loadImageIntoCropper(file) {
+    const url = URL.createObjectURL(file);
+    const probe = new Image();
+    probe.onload = () => {
+      natW = probe.naturalWidth;
+      natH = probe.naturalHeight;
+      baseScale = VP / Math.min(natW, natH);
+      scale = baseScale;
+      offX = (VP - natW * scale) / 2;
+      offY = (VP - natH * scale) / 2;
+      zoomRange.value = 1;
+      cropImage.src = url;
+      cropImage.hidden = false;
+      cropPlaceholder.hidden = true;
+      cropControls.hidden = false;
+      newImageChosen = true;
+      renderCropTransform();
+    };
+    probe.src = url;
+  }
+
+  function clampOffset() {
+    const dw = natW * scale, dh = natH * scale;
+    offX = Math.min(0, Math.max(VP - dw, offX));
+    offY = Math.min(0, Math.max(VP - dh, offY));
+  }
+
+  function renderCropTransform() {
+    clampOffset();
+    cropImage.style.width = (natW * scale) + 'px';
+    cropImage.style.height = (natH * scale) + 'px';
+    cropImage.style.left = offX + 'px';
+    cropImage.style.top = offY + 'px';
+  }
+
+  cropViewport.addEventListener('pointerdown', (e) => {
+    if (cropImage.hidden) return;
+    dragging = true;
+    dragStart = { x: e.clientX, y: e.clientY };
+    offStart = { x: offX, y: offY };
+    cropViewport.setPointerCapture(e.pointerId);
+  });
+  cropViewport.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    offX = offStart.x + (e.clientX - dragStart.x);
+    offY = offStart.y + (e.clientY - dragStart.y);
+    renderCropTransform();
+  });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(evt =>
+    cropViewport.addEventListener(evt, () => { dragging = false; })
+  );
+
+  zoomRange.addEventListener('input', () => {
+    scale = baseScale * parseFloat(zoomRange.value);
+    renderCropTransform();
+  });
+
+  pickImageBtn.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files && fileInput.files[0]) {
+      loadImageIntoCropper(fileInput.files[0]);
+    }
+  });
+
+  function getCroppedBlob() {
+    return new Promise((resolve) => {
+      const sx = (0 - offX) / scale;
+      const sy = (0 - offY) / scale;
+      const sSize = VP / scale;
+      const canvas = document.createElement('canvas');
+      canvas.width = OUTPUT;
+      canvas.height = OUTPUT;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(cropImage, sx, sy, sSize, sSize, 0, 0, OUTPUT, OUTPUT);
+      canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.92);
+    });
+  }
+
+  // ---------- Editor open/close ----------
+
+  function updateSlugPreview() {
+    if (editingSlug) return; // slug is immutable once a set exists
+    const s = slugify(fieldName.value);
+    slugPreview.textContent = s || '—';
+  }
+  fieldName.addEventListener('input', updateSlugPreview);
+
+  function openEditor(slug) {
+    editingSlug = slug || null;
+    resetCropper();
+    fieldName.value = '';
+    fieldDescription.value = '';
+    editorError.hidden = true;
+    songFilter.value = '';
+    currentIconNote.hidden = !editingSlug;
+
+    if (!editingSlug) {
+      editorTitle.textContent = 'New set';
+      slugPreview.textContent = '—';
+      renderSongList([]);
+      overlay.hidden = false;
+      fieldName.focus();
+      return;
+    }
+
+    editorTitle.textContent = 'Edit set';
+    overlay.hidden = false;
+
+    fetch(`/api/admin/sets/${encodeURIComponent(slug)}`)
+      .then(r => r.json())
+      .then(set => {
+        fieldName.value = set.name || '';
+        fieldDescription.value = set.description || '';
+        slugPreview.textContent = set.slug;
+        if (set.icon) {
+          cropImage.src = `/sets/icons/${encodeURIComponent(set.icon)}`;
+          cropImage.hidden = false;
+          cropPlaceholder.hidden = true;
+          cropImage.style.width = '100%';
+          cropImage.style.height = '100%';
+          cropImage.style.left = '0';
+          cropImage.style.top = '0';
+        }
+        renderSongList(set.songTitles || []);
+      })
+      .catch(() => {
+        editorError.textContent = 'Could not load this set.';
+        editorError.hidden = false;
+      });
+  }
+
+  function closeEditor() {
+    overlay.hidden = true;
+  }
+
+  $('newSetBtn').addEventListener('click', () => openEditor(null));
+  $('closeEditor').addEventListener('click', closeEditor);
+  $('cancelEditor').addEventListener('click', closeEditor);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeEditor(); });
+
+  // ---------- Save ----------
+
+  $('saveEditor').addEventListener('click', async () => {
+    editorError.hidden = true;
+    const name = fieldName.value.trim();
+    if (!name) {
+      editorError.textContent = 'Name is required.';
+      editorError.hidden = false;
+      return;
+    }
+    if (!editingSlug && !newImageChosen) {
+      editorError.textContent = 'Please choose a cover image.';
+      editorError.hidden = false;
+      return;
+    }
+
+    const saveBtn = $('saveEditor');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving…';
+
+    try {
+      const fd = new FormData();
+      fd.append('name', name);
+      fd.append('description', fieldDescription.value.trim());
+      fd.append('songs', JSON.stringify(getCheckedTitles()));
+
+      if (newImageChosen) {
+        const blob = await getCroppedBlob();
+        fd.append('icon', blob, `${slugify(name) || 'cover'}.jpg`);
+      }
+
+      const url = editingSlug ? `/api/admin/sets/${encodeURIComponent(editingSlug)}` : '/api/admin/sets';
+      const method = editingSlug ? 'PUT' : 'POST';
+      const res = await fetch(url, { method, body: fd });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Something went wrong.');
+      }
+
+      showToast(editingSlug ? 'Set updated.' : 'Set created.');
+      closeEditor();
+      await loadAll();
+    } catch (err) {
+      editorError.textContent = err.message;
+      editorError.hidden = false;
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save set';
+    }
+  });
+
+  loadAll();
+})();
+</script>
+</body>
+</html>
