@@ -111,7 +111,7 @@ function generateTransaction(type, req, res, forcedTitles = null) {
             transaction.items.push(song);
         }
         transactions.set(uuid, transaction);
-        console.log(transaction);
+        //console.log(transaction);
         return transaction;
     }
 
@@ -171,7 +171,7 @@ function generateTransaction(type, req, res, forcedTitles = null) {
     }
     
     transactions.set(uuid, transaction);
-    console.log(transaction);
+    //console.log(transaction);
 
     return transaction;
 }
@@ -476,10 +476,6 @@ app.get('/api/inventory-check-in', (req, res) => {
                         const setMembers = mediaDictionary.filter(s => s.sets && s.sets.includes(set));
                         const allSongsInSet = setMembers.length;
                         const songsUnlocked = historyArray.filter(s => s.title === txSong.title).length;
-
-                        console.warn("asis", allSongsInSet)
-                        console.warn(setMembers)
-                        console.warn("su", songsUnlocked)
                         
                         response.sets.push({
                             name: fullSet.name,
@@ -633,7 +629,7 @@ app.post('/subscribe-transaction-notification', (req, res) => {
 const upload = multer({ storage: multer.memoryStorage() });
 
 function isAdminIp(req) {
-    return req.ip.includes('192.168.1.') || req.ip.includes('127.0.0.1');
+    return req.ip.includes('192.168.') || req.ip.includes('127.0.0.1');
 }
 
 function slugify(name) {

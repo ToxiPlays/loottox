@@ -161,7 +161,7 @@ img.set-icon {
 .sets-ctn {
     display: flex;
     width: max-content;
-    animation: scrollIdle 50s ease-in-out infinite;
+    animation: scrollIdle 40s ease-in-out infinite;
 }
 
 .sets-ctn:hover {

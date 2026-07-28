@@ -406,6 +406,7 @@ const songs = document.querySelectorAll('.song-row > h2');
                         notifyBtn.classList.remove('hidden');
                     }
                 }
+                document.getElementById("inventoryLink").classList.remove('hidden');
                 document.querySelector("title").textContent = `W Pull? | Loottox`;
             }
 

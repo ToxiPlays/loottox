@@ -238,5 +238,38 @@
         "sets": [
             "homage"
         ]
+    },
+    {
+        "title": "bop it (meownarch remix)",
+        "description": "Released by meownarch on March 20, 2026 to [all streaming platforms](https://distrokid.com/hyperfollow/meownarch/bop-it-feat-toxiplays-2). Samples the <i>DON'T KNOCK THE GRIND</i> track by the same name.",
+        "rarity": "common",
+        "src": "bop it.wav",
+        "sets": [
+            "remixes"
+        ]
+    },
+    {
+        "title": "i wish it was me (after all) [deadbyoctober remix]",
+        "description": "deadbyoctober released this flip on July 24, 2025 to all streaming platforms as part of [the deluxe for <i>forevertrapped</i>](https://genius.com/albums/Deadbyoctober/Forevertrapped-deluxe).",
+        "rarity": "common",
+        "src": "iwishitwasmeafterall remaster.wav",
+        "sets": [
+            "remixes"
+        ]
+    },
+    {
+        "title": "i need another",
+        "description": "Uploaded to [SoundCloud](https://soundcloud.com/toxiplays) on July 6, 2026, before being taken down.",
+        "rarity": "rare",
+        "src": "i_need_another.mp3",
+        "sets": [
+            "homage"
+        ]
+    },
+    {
+        "title": "Pullin Up",
+        "description": "Released November 6, 2021 as part of Jalisa's album <i>Lil Soulo</i> on [all streaming platforms](https://open.spotify.com/intl-de/album/4GMKelRPpIQM4aAp3aoMjZ).",
+        "rarity": "common",
+        "src": "Pullin Up (feat. ToxiPlays).mp3"
     }
 ]

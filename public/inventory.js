@@ -477,7 +477,7 @@ log("Songs loaded!");
 if (serverData.sets.length > 0) {
     log("Loading sets...");
     let template = document.querySelector(".card.template");
-    serverData.sets.forEach((set) => {
+    serverData.sets.sort((a, b) => b.completion - a.completion).forEach((set) => {
         let card = template.cloneNode(true);
         card.querySelector("img").src = `/sets/icons/${set.icon}`;
         if (set.completion < 1) {
