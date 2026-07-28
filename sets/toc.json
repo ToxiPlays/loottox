@@ -13,13 +13,13 @@
     },
     {
         "name": "THE WORLD IS YOURS ERA",
-        "description": "C'mon, don't act like you don't know what the title means\r\n\r\nArt: glitteryjellyfishy from [Genius](https://genius.com)",
-        "icon": "the-world-is-yours-era.jpg",
+        "description": "C'mon, don't act like you don't know what the title means",
+        "icon": "twiy.jpg",
         "slug": "twiy"
     },
     {
         "name": "Remixes 'n' Booty Bouncers",
-        "description": "Flips and alternate versions made aftter the fact.",
+        "description": "Flips and alternate versions made after the fact.",
         "icon": "remixes.jpg",
         "slug": "remixes"
     }
