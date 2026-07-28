@@ -473,5 +473,33 @@ document.querySelector(".unlocked-ctn").classList.remove("hidden");
 fakeCtn.classList.add("hidden");
 
 log("Songs loaded!");
+
+if (serverData.sets.length > 0) {
+    log("Loading sets...");
+    let template = document.querySelector(".card.template");
+    serverData.sets.forEach((set) => {
+        let card = template.cloneNode(true);
+        card.querySelector("img").src = `/sets/icons/${set.icon}`;
+        if (set.completion < 1) {
+            card.querySelector(".card-icon").classList.add("card-locked-icon");
+            card.title = `You haven't gotten all ${set.name} songs yet`;
+        }
+        let a = document.createElement("a");
+        a.href = `/sets/${set.slug}`;
+        a.textContent = set.name;
+        a.title = set.description;
+        card.querySelector("h3").appendChild(a);
+        card.querySelector(".card-prog-track").title = `${(set.completion * 100).toFixed(2)}% songs discovered`;
+        setTimeout(() => {card.querySelector(".card-progress").style = `width: ${(set.completion * 100).toFixed(2)}%;`}, Math.floor(Math.random() * (200 - 100 + 1)) + 100);
+        document.querySelector(".sets-ctn").appendChild(card);
+    });
+    document.querySelector(".sets-ctn").classList.remove("hidden");
+    document.querySelector(".sets-wrapper").classList.remove("hidden");
+    template.remove();
+
+} else {
+    log("No sets discovered.");
+}
+
 document.getElementById("debug-status").classList.add("hidden");
 songTemplate.remove();
