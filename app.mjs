@@ -452,7 +452,9 @@ app.get('/api/inventory-check-in', (req, res) => {
     let response = { success: true };
 
     // populate response.items with { title: ..., rarity: ..., unlocked: boolean } based on mediaDictionary/authenticatedTitles
+    // populate response.sets with sets that these songs concern and 0-1 completion based on how much songs the user has collected
     response.items = [];
+    response.sets = [];
     historyArray.forEach((song) => {
         let txSong = mediaDictionary.find(s2 => s2.title === song.title);
         if (txSong) {
@@ -463,15 +465,37 @@ app.get('/api/inventory-check-in', (req, res) => {
                 rarity: txSong.rarity,
                 unlocked: unlock
             });
+
+            if (txSong.sets) {
+                txSong.sets.forEach(set => {
+                    if (response.sets.some(x => x.slug === set)) {
+                        return;
+                    }
+                    let fullSet = setDictionary.find(y => y.slug === set);
+                    if (fullSet) {
+                        const setMembers = mediaDictionary.filter(s => s.sets && s.sets.includes(set));
+                        const allSongsInSet = setMembers.length;
+                        const songsUnlocked = historyArray.filter(s => s.title === txSong.title).length;
+
+                        console.warn("asis", allSongsInSet)
+                        console.warn(setMembers)
+                        console.warn("su", songsUnlocked)
+                        
+                        response.sets.push({
+                            name: fullSet.name,
+                            description: fullSet.description,
+                            icon: fullSet.icon,
+                            slug: fullSet.slug,
+                            completion: allSongsInSet > 0 ? songsUnlocked / allSongsInSet : 0
+                        });
+                    }
+                });
+            }
         }
     });
 
-    //TO-DO: achievement completion here in response.sets
-    //{ name: xxx, icon: xxx, completion: 0-1 }
-    response.sets = [];
-
     res.status(200).json(response);
-})
+});
 
 app.get('/api/can-download', (req, res) => {
     const encryptedKey = req.cookies.downloadKey;
