@@ -23,6 +23,7 @@
   }
   *{ box-sizing:border-box; }
   html,body{ height:100%; }
+  .is-hidden{ display:none !important; }
   body{
     margin:0;
     background:
@@ -94,7 +95,7 @@
   .card-name{ font-weight:700; font-size:15px; line-height:1.3; }
   .card-desc{
     color:var(--muted); font-size:13px; line-height:1.4;
-    display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
     min-height:2.6em;
   }
   .card-meta{
@@ -226,10 +227,10 @@
   <p class="page-sub">Curated groupings of songs. Each set gets its own square cover image and a slug generated from its name.</p>
 
   <div id="setsGrid" class="grid"></div>
-  <p id="emptyState" class="empty" hidden>No sets yet — create one to get started.</p>
+  <p id="emptyState" class="empty is-hidden">No sets yet — create one to get started.</p>
 </main>
 
-<div id="overlay" class="overlay" hidden>
+<div id="overlay" class="overlay is-hidden">
   <div class="editor">
     <div class="editor-head">
       <h2 id="editorTitle">New set</h2>
@@ -256,16 +257,16 @@
         <div class="field">
           <span class="field-label">Cover image</span>
           <div class="cropper-viewport" id="cropViewport">
-            <img id="cropImage" alt="" draggable="false" hidden>
+            <img id="cropImage" alt="" draggable="false" class="is-hidden">
             <div class="cropper-placeholder" id="cropPlaceholder"><span>No image selected</span></div>
           </div>
-          <div class="cropper-controls" id="cropControls" hidden>
+          <div class="cropper-controls is-hidden" id="cropControls">
             <input type="range" id="zoomRange" min="1" max="3" step="0.01" value="1">
           </div>
-          <input type="file" id="fileInput" accept="image/*" hidden>
+          <input type="file" id="fileInput" accept="image/*" class="is-hidden">
           <div class="cropper-actions">
             <button type="button" id="pickImageBtn" class="btn btn-secondary">Choose image</button>
-            <span id="currentIconNote" class="hint" hidden>Choosing a new image will replace the current cover.</span>
+            <span id="currentIconNote" class="hint is-hidden">Choosing a new image will replace the current cover.</span>
           </div>
         </div>
       </div>
@@ -281,7 +282,7 @@
     </div>
 
     <div class="editor-foot">
-      <span id="editorError" class="error" hidden></span>
+      <span id="editorError" class="error is-hidden"></span>
       <div class="editor-foot-actions">
         <button type="button" id="cancelEditor" class="btn btn-ghost">Cancel</button>
         <button type="button" id="saveEditor" class="btn btn-primary">Save set</button>
@@ -307,6 +308,8 @@
   let dragging = false, dragStart = null, offStart = null;
 
   const $ = (id) => document.getElementById(id);
+  const setHidden = (el, isHidden) => el.classList.toggle('is-hidden', isHidden);
+  const isHidden = (el) => el.classList.contains('is-hidden');
   const setsGrid = $('setsGrid');
   const emptyState = $('emptyState');
   const overlay = $('overlay');
@@ -368,7 +371,7 @@
 
   function renderGrid() {
     setsGrid.innerHTML = '';
-    emptyState.hidden = sets.length > 0;
+    setHidden(emptyState, sets.length > 0);
     for (const set of sets) {
       const card = document.createElement('div');
       card.className = 'card';
@@ -450,10 +453,10 @@
   function resetCropper() {
     natW = natH = 0; scale = baseScale = 1; offX = offY = 0;
     newImageChosen = false;
-    cropImage.hidden = true;
+    setHidden(cropImage, true);
     cropImage.removeAttribute('src');
-    cropPlaceholder.hidden = false;
-    cropControls.hidden = true;
+    setHidden(cropPlaceholder, false);
+    setHidden(cropControls, true);
     zoomRange.value = 1;
   }
 
@@ -469,9 +472,9 @@
       offY = (VP - natH * scale) / 2;
       zoomRange.value = 1;
       cropImage.src = url;
-      cropImage.hidden = false;
-      cropPlaceholder.hidden = true;
-      cropControls.hidden = false;
+      setHidden(cropImage, false);
+      setHidden(cropPlaceholder, true);
+      setHidden(cropControls, false);
       newImageChosen = true;
       renderCropTransform();
     };
@@ -493,7 +496,7 @@
   }
 
   cropViewport.addEventListener('pointerdown', (e) => {
-    if (cropImage.hidden) return;
+    if (isHidden(cropImage)) return;
     dragging = true;
     dragStart = { x: e.clientX, y: e.clientY };
     offStart = { x: offX, y: offY };
@@ -549,21 +552,21 @@
     resetCropper();
     fieldName.value = '';
     fieldDescription.value = '';
-    editorError.hidden = true;
+    setHidden(editorError, true);
     songFilter.value = '';
-    currentIconNote.hidden = !editingSlug;
+    setHidden(currentIconNote, !editingSlug);
 
     if (!editingSlug) {
       editorTitle.textContent = 'New set';
       slugPreview.textContent = '—';
       renderSongList([]);
-      overlay.hidden = false;
+      setHidden(overlay, false);
       fieldName.focus();
       return;
     }
 
     editorTitle.textContent = 'Edit set';
-    overlay.hidden = false;
+    setHidden(overlay, false);
 
     fetch(`/api/admin/sets/${encodeURIComponent(slug)}`)
       .then(r => r.json())
@@ -573,8 +576,8 @@
         slugPreview.textContent = set.slug;
         if (set.icon) {
           cropImage.src = `/sets/icons/${encodeURIComponent(set.icon)}`;
-          cropImage.hidden = false;
-          cropPlaceholder.hidden = true;
+          setHidden(cropImage, false);
+          setHidden(cropPlaceholder, true);
           cropImage.style.width = '100%';
           cropImage.style.height = '100%';
           cropImage.style.left = '0';
@@ -584,12 +587,12 @@
       })
       .catch(() => {
         editorError.textContent = 'Could not load this set.';
-        editorError.hidden = false;
+        setHidden(editorError, false);
       });
   }
 
   function closeEditor() {
-    overlay.hidden = true;
+    setHidden(overlay, true);
   }
 
   $('newSetBtn').addEventListener('click', () => openEditor(null));
@@ -600,16 +603,16 @@
   // ---------- Save ----------
 
   $('saveEditor').addEventListener('click', async () => {
-    editorError.hidden = true;
+    setHidden(editorError, true);
     const name = fieldName.value.trim();
     if (!name) {
       editorError.textContent = 'Name is required.';
-      editorError.hidden = false;
+      setHidden(editorError, false);
       return;
     }
     if (!editingSlug && !newImageChosen) {
       editorError.textContent = 'Please choose a cover image.';
-      editorError.hidden = false;
+      setHidden(editorError, false);
       return;
     }
 
@@ -642,7 +645,7 @@
       await loadAll();
     } catch (err) {
       editorError.textContent = err.message;
-      editorError.hidden = false;
+      setHidden(editorError, false);
     } finally {
       saveBtn.disabled = false;
       saveBtn.textContent = 'Save set';

@@ -3,7 +3,10 @@
         "title": "Millionaire (OG)",
         "description": "Featuring vocals from october and Kid Wcked. Different first verse. Cool!",
         "rarity": "uncommon",
-        "src": "millionaire old ver.wav"
+        "src": "millionaire old ver.wav",
+        "sets": [
+            "remixes"
+        ]
     },
     {
         "title": "Heartthrob",
@@ -15,19 +18,29 @@
         "title": "sip for you",
         "description": "Ya know, like from <i>PINK IS BETTER</i>?\r\nExported March 27, 2025, released to [SoundCloud](https://soundcloud.com/toxiplays) during film class, deleted shortly after.",
         "rarity": "rare",
-        "src": "sip_4_u.mp3"
+        "src": "sip_4_u.mp3",
+        "sets": [
+            "homage"
+        ]
     },
     {
         "title": "the jig is beautiful",
         "description": "Our bones really are just artifacts ultimately, huh?\r\nOriginally exported April 6, 2025. Uploaded to [cology](https://soundcloud.com/cology) before being taken down. Remastered for Loottox.",
         "rarity": "rare",
-        "src": "the_jig_is_beautiful.mp3"
+        "src": "the_jig_is_beautiful.mp3",
+        "sets": [
+            "homage"
+        ]
     },
     {
         "title": "shots in the air",
         "description": "w non-canon loosie\r\nAvailable [exclusively on SoundCloud](https://soundcloud.com/toxiplays/shots-in-the-air). Released June 23, 2026.",
         "rarity": "common",
-        "src": "shots_in_the_air_prod_skitzo_ranger.mp3"
+        "src": "shots_in_the_air_prod_skitzo_ranger.mp3",
+        "sets": [
+            "yabwave",
+            "twiy"
+        ]
     },
     {
         "title": "Soñé Contigo",
@@ -39,19 +52,30 @@
         "title": "Ghost Town (Stripped)",
         "description": "A drumless more spacy version of the country-pop single [\"Ghost Town\"](https://www.youtube.com/watch?v=qBMb374YomM), which originally released on March 19, 2026 to [YouTube](https://www.youtube.com/watch?v=qBMb374YomM) and [SoundCloud](https://soundcloud.com/toxiplays/ghost-town).",
         "rarity": "uncommon",
-        "src": "ghost_town_stripped.mp3"
+        "src": "ghost_town_stripped.mp3",
+        "sets": [
+            "homage"
+        ]
     },
     {
         "title": "wordle freestyle",
         "description": "Unchained freestyle released everywhere on June 5, 2026 to raise hype for the then-upcoming mixtape, THE WORLD IS YOURS. YouTube has a [lyric video](https://www.youtube.com/watch?v=qV4Co7C0PMo).\r\n\r\nMy greatest thanks to [Kyeler](https://genius.com/Kyeler) for providing the sync live on [Spicy Lyrics](https://spicylyrics.org). That's what you see to your right. I was NOT resyncing this from scratch.",
         "rarity": "common",
-        "src": "wordle_freestyle.mp3"
+        "src": "wordle_freestyle.mp3",
+        "sets": [
+            "yabwave",
+            "twiy"
+        ]
     },
     {
         "title": "Splendid (Remix)",
         "description": "This was supposed to be released as an Instagram Reel or a TikTok or something but that just never happened 😭",
         "rarity": "uncommon",
-        "src": "splendid_remix.mp3"
+        "src": "splendid_remix.mp3",
+        "sets": [
+            "twiy",
+            "remixes"
+        ]
     },
     {
         "title": "PUMP THE BASS (OG)",
@@ -63,7 +87,10 @@
         "title": "behind me",
         "description": "it would've been yabnb, but i wasn't motivated enough to add the yab rofl",
         "rarity": "uncommon",
-        "src": "VERT_behind me (yabnb).mp3"
+        "src": "VERT_behind me (yabnb).mp3",
+        "sets": [
+            "yabwave"
+        ]
     },
     {
         "title": "special way",
@@ -75,7 +102,10 @@
         "title": "a dream i can't remember",
         "description": "something something voice memos but way more atmospheric\r\n\r\nA visualizer for this was uploaded to Twitter and then deleted within the same hour so that technically makes this rare even though it accumulated six views in that time oh well dawg [follow me](https://x.com/toximixs)",
         "rarity": "rare",
-        "src": "adicr.mp3"
+        "src": "adicr.mp3",
+        "sets": [
+            "homage"
+        ]
     },
     {
         "title": "this is not a special time",
@@ -87,7 +117,10 @@
         "title": "Too Far",
         "description": "you know what's <em>actually</em> wrong with our generation? nobody's making fnaf music anymore",
         "rarity": "uncommon",
-        "src": "shure_mic_test.mp3"
+        "src": "shure_mic_test.mp3",
+        "sets": [
+            "homage"
+        ]
     },
     {
         "title": "DEATH BY EXECUTION (OG)",
@@ -105,7 +138,10 @@
         "title": "tell me",
         "description": "larpinairy bro 😭",
         "rarity": "uncommon",
-        "src": "tell_me.mp3"
+        "src": "tell_me.mp3",
+        "sets": [
+            "homage"
+        ]
     },
     {
         "title": "Let the Blood Rush",
@@ -117,19 +153,29 @@
         "title": "WALK WALK WALK",
         "description": "WAAAAAAAAAAAAAALKKKKKKKKKKKKKKK‼‼‼‼\r\n\r\nlil sneak peek @ what's gonna happen during THE WORLD IS YOURS era",
         "rarity": "legendary",
-        "src": "walk_walk_walk_prod_lugo.mp3"
+        "src": "walk_walk_walk_prod_lugo.mp3",
+        "sets": [
+            "twiy"
+        ]
     },
     {
         "title": "WAKE FROM YOUR SLEEP 2",
         "description": "The classic ballad between insomnia and hypersomnia, [originally released by Scarlett Parker in 2021](https://open.spotify.com/track/52EkuIL8iORFZItfLPBKP0), completely recreated in May 2025. New verse lyrics and completely new vocals, only available in this pull. Aren't you so lucky?\r\n\r\nOriginal was track 5 from Ms. Parker's debut album, <i>WAS IT WORTH IT?</i>.",
         "rarity": "uncommon",
-        "src": "wfys_2.mp3"
+        "src": "wfys_2.mp3",
+        "sets": [
+            "remixes"
+        ]
     },
     {
         "title": "WHAT IT FEELS LIKE",
         "description": "okay if you check the exact date this file is created and the exact date of this commit, this song is genuinely exactly 1 month old that's crazy\r\n\r\nplease get on my ass about re-recording this on an actual mic btw :')",
         "rarity": "legendary",
-        "src": "what_it_feels_like_prod_frost.mp3"
+        "src": "what_it_feels_like_prod_frost.mp3",
+        "sets": [
+            "yabwave",
+            "twiy"
+        ]
     },
     {
         "title": "The Man",
@@ -141,7 +187,10 @@
         "title": "UNTIL I PASS OUT",
         "description": "Exported Oct 31, 2024. This was released... somewhere. Only cool people get the link though. Or you could... y'know... listen to it here ^_^",
         "rarity": "common",
-        "src": "UNTIL_I_PASS_OUT.mp3"
+        "src": "UNTIL_I_PASS_OUT.mp3",
+        "sets": [
+            "homage"
+        ]
     },
     {
         "title": "UP!",
@@ -159,13 +208,21 @@
         "title": "Keys To My Heart",
         "description": "Self-produced emo electropop for the soul.\r\n\r\nCongratulations! You've pulled probably one of the best songs from <i>THE WORLD IS YOURS</i>.",
         "rarity": "legendary",
-        "src": "keys_to_my_heart_pt_1.mp3"
+        "src": "keys_to_my_heart_pt_1.mp3",
+        "sets": [
+            "twiy",
+            "remixes"
+        ]
     },
     {
         "title": "SPLIT WIG PARTY",
         "description": "here's some more yabwave for ya babe\r\n\r\nFeaturing vocals from soemmy.",
         "rarity": "legendary",
-        "src": "SPLIT_WIG_PARTY_FT_SOEMMY.mp3"
+        "src": "SPLIT_WIG_PARTY_FT_SOEMMY.mp3",
+        "sets": [
+            "yabwave",
+            "twiy"
+        ]
     },
     {
         "title": "Make Me New Again",
@@ -177,6 +234,9 @@
         "title": "paint it red...",
         "description": "Exported Feb 27 2024 and taken down later that year for social reasons. Remastered for Loottox.",
         "rarity": "rare",
-        "src": "paint_it_red_loottox_final.mp3"
+        "src": "paint_it_red_loottox_final.mp3",
+        "sets": [
+            "homage"
+        ]
     }
 ]

@@ -1,1 +1,26 @@
-[]
+[
+    {
+        "name": "Yabwave™",
+        "description": "All of these scraps come from my participation in the Yabwave collective",
+        "icon": "yabwave.jpg",
+        "slug": "yabwave"
+    },
+    {
+        "name": "Homage",
+        "description": "Everything in this set is paying homage to <em>somebody</em> somehow\r\n\r\n[Art credit](https://x.com/watta_jump)",
+        "icon": "homage.jpg",
+        "slug": "homage"
+    },
+    {
+        "name": "THE WORLD IS YOURS ERA",
+        "description": "C'mon, don't act like you don't know what the title means\r\n\r\nArt: glitteryjellyfishy from [Genius](https://genius.com)",
+        "icon": "the-world-is-yours-era.jpg",
+        "slug": "twiy"
+    },
+    {
+        "name": "Remixes 'n' Booty Bouncers",
+        "description": "Flips and alternate versions made aftter the fact.",
+        "icon": "remixes.jpg",
+        "slug": "remixes"
+    }
+]
