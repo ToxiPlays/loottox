@@ -231,15 +231,6 @@
         "src": "make_me_new_again.mp3"
     },
     {
-        "title": "paint it red...",
-        "description": "Exported Feb 27 2024 and taken down later that year for social reasons. Remastered for Loottox.",
-        "rarity": "rare",
-        "src": "paint_it_red_loottox_final.mp3",
-        "sets": [
-            "homage"
-        ]
-    },
-    {
         "title": "bop it (meownarch remix)",
         "description": "Released by meownarch on March 20, 2026 to [all streaming platforms](https://distrokid.com/hyperfollow/meownarch/bop-it-feat-toxiplays-2). Samples the <i>DON'T KNOCK THE GRIND</i> track by the same name.",
         "rarity": "common",
@@ -249,7 +240,7 @@
         ]
     },
     {
-        "title": "i wish it was me (after all) [deadbyoctober remix]",
+        "title": "i wish it was me (after all) [meownarch remix]",
         "description": "deadbyoctober released this flip on July 24, 2025 to all streaming platforms as part of [the deluxe for <i>forevertrapped</i>](https://genius.com/albums/Deadbyoctober/Forevertrapped-deluxe).",
         "rarity": "common",
         "src": "iwishitwasmeafterall remaster.wav",
@@ -271,5 +262,14 @@
         "description": "Released November 6, 2021 as part of Jalisa's album <i>Lil Soulo</i> on [all streaming platforms](https://open.spotify.com/intl-de/album/4GMKelRPpIQM4aAp3aoMjZ).",
         "rarity": "common",
         "src": "Pullin Up (feat. ToxiPlays).mp3"
+    },
+    {
+        "title": "Lied to You",
+        "description": "This was made specifically for Loottox tbh. Enjoy that thought!",
+        "rarity": "uncommon",
+        "src": "Lied to You prod Romano 111% speed.mp3",
+        "sets": [
+            "homage"
+        ]
     }
 ]
