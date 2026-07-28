@@ -160,5 +160,23 @@
         "description": "Self-produced emo electropop for the soul.\r\n\r\nCongratulations! You've pulled probably one of the best songs from <i>THE WORLD IS YOURS</i>.",
         "rarity": "legendary",
         "src": "keys_to_my_heart_pt_1.mp3"
+    },
+    {
+        "title": "SPLIT WIG PARTY",
+        "description": "here's some more yabwave for ya babe",
+        "rarity": "legendary",
+        "src": "SPLIT_WIG_PARTY_FT_SOEMMY.mp3"
+    },
+    {
+        "title": "Make Me New Again",
+        "description": "Jugg gospel. I'm so bored, man",
+        "rarity": "uncommon",
+        "src": "make_me_new_again.mp3"
+    },
+    {
+        "title": "paint it red...",
+        "description": "Exported Feb 27 2024 and taken down later that year for social reasons. Remastered for Loottox.",
+        "rarity": "rare",
+        "src": "paint_it_red_loottox_final.mp3"
     }
 ]
