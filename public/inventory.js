@@ -502,4 +502,30 @@ if (serverData.sets.length > 0) {
 }
 
 document.getElementById("debug-status").classList.add("hidden");
+document.getElementById("rebirth-link").classList.remove("hidden");
 songTemplate.remove();
+
+document.getElementById("rebirth-link").addEventListener("click", () => {
+    document.querySelector(".modal-container").classList.remove("hidden");
+    document.getElementById("rebirth-complete-modal").classList.add("hidden");
+    document.getElementById("rebirth-modal").classList.remove("hidden");
+    document.getElementById("confirm-rebirth-btn").classList.add("hidden");
+    setTimeout(() => {
+        document.getElementById("confirm-rebirth-btn").classList.remove("hidden");
+    }, 8000);
+});
+
+document.getElementById("hide-rebirth-btn").addEventListener("click", () => {
+    document.querySelector(".modal-container").classList.add("hidden");
+    document.getElementById("rebirth-complete-modal").classList.add("hidden");
+    document.getElementById("rebirth-modal").classList.add("hidden");
+});
+
+document.getElementById("confirm-rebirth-btn").addEventListener("click", () => {
+    log("Rebirth requested!");
+    document.getElementById("rebirth-complete-modal").classList.remove("hidden");
+    document.getElementById("rebirth-modal").classList.add("hidden");
+    document.querySelector(".sets-ctn").classList.add("hidden");
+    document.querySelector(".unlocked-ctn").classList.add("hidden");
+    localStorage.clear();
+});

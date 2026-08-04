@@ -30,6 +30,7 @@
         <h1 class="home-link">LOOTTOX</h1>
         <nav class="navigation">
             <a href="/" id="home-link">Home</a>
+            <a id="rebirth-link" class="hidden">Rebirth</a>
         </nav>
         <p class="navigation">&copy; 2026 <a href="https://toxadil.com">Toxadil</a></p>
     </header>
@@ -70,6 +71,20 @@
                         <button title="You sure? There's no turning back" class="btn">Forget %SONGNAME%</button>
                     </div>
                 </div>
+            </div>
+        </div>
+        <div class="modal-container hidden">
+            <div class="modal" id="rebirth-modal">
+                <h3>Leaving it all behind?</h3>
+                <p>With the wave of this wand, all your progress will be deleted. <strong>That means sets, songs...</strong> just about <strong>everything</strong> you've earned while playing Loottox.</p>
+                <p>Forever is a long time! Do this only if you'd like a fresh start.</p>
+                <p>
+                    <button class="btn" id="hide-rebirth-btn">I changed my mind</button>
+                    <button class="btn" id="confirm-rebirth-btn">I'm ready</button>
+                </p>
+            </div>
+            <div class="modal" id="rebirth-complete-modal">
+                <p>Your inventory's been dumped into the nearest lake offshore. <a href="/" class="body-link">Go home?</a></p>
             </div>
         </div>
     </main>
