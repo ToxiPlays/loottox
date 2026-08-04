@@ -14,19 +14,15 @@ localStorage.setItem("tx-index", savedTxTicker.toString());
 let savedTrackTicker = 0;
 
 async function reflectExistingSubscription() {
-    if (!('serviceWorker' in navigator)) return;
+    if (!('serviceWorker' in navigator)) return false;
     const reg = await navigator.serviceWorker.getRegistration('/');
-    if (!reg) return;
+    if (!reg) return false;
     const existing = await reg.pushManager.getSubscription();
-    if (existing) {
-        return true;
-    } else {
-        return false;
-    }
+    return !!existing;
 }
 
 let alreadySubscribed = false;
-alreadySubscribed = reflectExistingSubscription();
+reflectExistingSubscription().then(result => { alreadySubscribed = result; });
 
 function getCookie(name) {
     const match = document.cookie.split('; ').find(row => row.startsWith(name + '='));
@@ -401,8 +397,8 @@ const songs = document.querySelectorAll('.song-row > h2');
             if (document.querySelectorAll('.song-row > h2.blurred').length === 0) {
                 fadeOutGlow();
                 document.removeEventListener('mousemove', updateGlowVolume);
-                if ("Notification" in window) {
-                    if (Notification.permission !== "default" && alreadySubscribed === false) {
+                if ("Notification" in window && "serviceWorker" in navigator) {
+                    if (Notification.permission !== "denied" && !alreadySubscribed) {
                         notifyBtn.classList.remove('hidden');
                     }
                 }
