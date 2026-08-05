@@ -22,5 +22,11 @@
         "description": "Flips and alternate versions made after the fact.",
         "icon": "remixes.jpg",
         "slug": "remixes"
+    },
+    {
+        "name": "My Legacy",
+        "description": "These songs are part of my legacy, recorded long before I could've ever dreamed of my current era\r\n\r\n[Art credit](https://x.com/qiukuuuuuuuu/status/1944074363789357385?t=lwWFcvfsKfMTKB5Ll3dl_A&s=09)",
+        "icon": "legacy.jpg",
+        "slug": "legacy"
     }
 ]

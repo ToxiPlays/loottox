@@ -944,6 +944,65 @@ app.get(('/inventory'), (req, res) => {
     res.status(200).sendFile(path.join(import.meta.dirname, 'src', 'inventory.html'));
 });
 
+app.get(('/sets/:slug'), (req, res) => {
+    const setsToc = readSetsToc();
+    const set = setsToc.find(s => s.slug === req.params.slug);
+    if (!set) return res.status(404).sendFile(path.join(import.meta.dirname, 'src', '404.html'));
+
+    const filePath = path.join(import.meta.dirname, 'src', 'setview.html');
+    fs.readFile(filePath, 'utf8', (err, data) => {
+        if (err) {
+            return res.status(500).send('Error reading file');
+        }
+        const songTitles = readMediaToc()
+        .filter(song => Array.isArray(song.sets) && song.sets.includes(set.slug))
+        .map(song => song.title);
+
+        const modifiedContent = data.replaceAll('{FULLNAME}', set.name)
+        .replaceAll('{DESCRIPTION}', set.description.replaceAll("\r\n","<br/>"))
+        .replaceAll('`{SONGLENGTH}`', songTitles.length)
+        .replaceAll('{ICONURL}', `${set.icon}`);
+        res.send(modifiedContent);
+    });
+});
+
+app.get('/api/set-progress/:slug', (req, res) => {
+    const setsToc = readSetsToc();
+    const set = setsToc.find(s => s.slug === req.params.slug);
+    if (!set) return res.status(404).json({ success: false, error: "Set not found." })
+    
+    const historyString = req.query.save;
+    function parseTrackString(str) {
+        return str
+            .split('|')
+            .filter(Boolean)
+            .map(entry => {
+            const parts = entry.split(':');
+            const [time, tx, order] = parts.slice(-3).map(Number);
+            const title = parts.slice(0, -3).join(':');
+            return { title, time, tx, order };
+            });
+    }
+
+    let historyArray = parseTrackString(historyString);
+    let response = { success: true };
+
+    response.items = [];
+    historyArray.forEach((song) => {
+        let txSong = mediaDictionary.find(s2 => s2.title === song.title);
+        if (txSong && txSong.sets?.includes(req.params.slug)) {
+            response.items.push({
+                title: txSong.title,
+                description: txSong.description,
+                rarity: txSong.rarity,
+                sets: txSong.sets
+            });
+        }
+    });
+
+    res.status(200).json(response);
+});
+
 app.use(express.static('public'));
 app.use('/vendor/wavesurfer', express.static('./node_modules/wavesurfer.js/dist'));
 app.use('/sets/icons', express.static(path.resolve('./sets/icons')));

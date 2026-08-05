@@ -1,0 +1,41 @@
+.set-card {
+    display: flex;
+}
+
+.set-column {
+    padding: 2%;
+}
+
+img.set-icon {
+    border-radius: 10%;
+    width: 8em;
+    height: 8em;
+    transition: all 1s;
+    pointer-events: none;
+}
+
+.set-card:has(div > .set-icon) {
+    align-items: center;
+    justify-content: center;
+}
+
+.set-body {
+    width: 70vw;
+}
+
+.set-unloaded-icon {
+    opacity: 0.3;
+}
+
+.button-container {
+    margin-top: 1em;
+}
+
+.song-row {
+    cursor: default;
+}
+
+.song-row:hover {
+    transform: translateY(0);
+    font-size: 110%;
+}

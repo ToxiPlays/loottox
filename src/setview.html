@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="title" content="Loottox">
+    <meta name="robots" content="index, follow">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="language" content="English">
+    <meta name="author" content="toxi">
+    <link rel="stylesheet" href="/main.css">
+    <link rel="stylesheet" href="/landing.css">
+    <link rel="stylesheet" href="/inventory.css">
+    <link rel="stylesheet" href="/set.css">
+    <link rel="icon" type="image/png" href="/icons/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/png" href="/icons/favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="/icons/favicon-16x16.png" sizes="16x16" />
+    <link rel="icon" type="image/png" href="/icons/favicon-128.png" sizes="128x128" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=arrow_drop_down" />
+    <script>
+        globalThis.setAttributes = {
+            name: "{FULLNAME}",
+            description: "{DESCRIPTION}",
+            songLength: `{SONGLENGTH}`,
+            img: "/sets/icons/{ICONURL}"
+        }
+    </script>
+    <script src="/set.js" type="module" defer></script>
+    <title>{FULLNAME} | Loottox</title>
+</head>
+<body>
+    <header>
+        <h1 class="home-link">LOOTTOX</h1>
+        <nav class="navigation">
+            <a href="/">Home</a>
+            <a href="/inventory">Inventory</a>
+        </nav>
+        <p class="navigation">&copy; 2026 <a href="https://toxadil.com">Toxadil</a></p>
+    </header>
+    <main>
+        <p class="hidden" id="hidden-hi">hi</p>
+        <div class="set-card">
+            <div class="set-column">
+                <img src="/sets/icons/{ICONURL}" class="set-icon set-unloaded-icon"/>
+            </div>
+            <div class="set-column set-body">
+                <h2>{FULLNAME} <span class="material-symbols-outlined dropdown-icon hidden" id="expand">arrow_drop_down</span></h2>
+                <p class="description hidden">Description goes here</p>
+                <p class="subtitle">0 / `{SONGLENGTH}` songs unlocked</p>
+            </div>
+        </div>
+        <div class="song-ctn">
+        </div>
+        <div class="button-container">
+            <button class="btn" id="share-btn">Share progress</button>
+        </div>
+    </main>
+</body>

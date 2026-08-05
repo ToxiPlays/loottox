@@ -487,9 +487,9 @@ if (serverData.sets.length > 0) {
         let a = document.createElement("a");
         a.href = `/sets/${set.slug}`;
         a.textContent = set.name;
-        a.title = set.description;
+        a.title = set.description.split("\n")[0].replace(/<\/?[^>]+(>|$)/g, "");
         card.querySelector("h3").appendChild(a);
-        card.querySelector(".card-prog-track").title = `${(set.completion * 100).toFixed(2)}% songs discovered`;
+        card.querySelector(".card-prog-track").title = `You've discovered ${(set.completion * 100).toFixed(2)}% of this set`;
         setTimeout(() => {card.querySelector(".card-progress").style = `width: ${(set.completion * 100).toFixed(2)}%;`}, Math.floor(Math.random() * (200 - 100 + 1)) + 100);
         document.querySelector(".sets-ctn").appendChild(card);
     });

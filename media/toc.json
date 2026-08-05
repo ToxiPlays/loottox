@@ -46,7 +46,10 @@
         "title": "Soñé Contigo",
         "description": "una balada electrónica lenta que cuenta con las voces relajantes de la cantante de reggaetón Ashesndreams y la producción de ToxiPlays. Like that bio? brae liam wrote it!!!\r\n\r\nReleased Jan 17, 2023 to [YouTube](https://www.youtube.com/watch?v=dJgtmXrlg0s) and [SoundCloud](https://soundcloud.com/toxiplays/sone-contigo).",
         "rarity": "common",
-        "src": "sone contigo.mp3"
+        "src": "sone contigo.mp3",
+        "sets": [
+            "legacy"
+        ]
     },
     {
         "title": "Ghost Town (Stripped)",
@@ -96,7 +99,10 @@
         "title": "special way",
         "description": "Featuring vocals from Jalisa. Actually, it's her song. I'm not even credited as a feature. Spooky...\r\n\r\nJokes aside, this comes from her [ERROR](https://open.spotify.com/album/620nVMzpviuwTwRfwa6Jrc) EP, which released October 2020.",
         "rarity": "common",
-        "src": "special way.mp3"
+        "src": "special way.mp3",
+        "sets": [
+            "legacy"
+        ]
     },
     {
         "title": "a dream i can't remember",
@@ -181,7 +187,10 @@
         "title": "The Man",
         "description": "Exported December 31, 2024. Featuring vocals from Jalisa.\r\n\r\nThis song (well, part of it) was actually included in [Scribe Workshop](https://scribe-workshop.onrender.com/) as a RAP transcription, before being pulled from the catalogue. But that's a public release, making this rare.",
         "rarity": "rare",
-        "src": "_the_man_with_jalisa.mp3"
+        "src": "_the_man_with_jalisa.mp3",
+        "sets": [
+            "legacy"
+        ]
     },
     {
         "title": "UNTIL I PASS OUT",
@@ -196,7 +205,10 @@
         "title": "UP!",
         "description": "<strong>Originally</strong> released to streaming platforms on December 13, 2021. Featuring vocals from Livr.\r\n\r\nThis track generated around $0.31 from 51 streams before Spotify decided years later that those streams were fake and told RouteNote to delete the song from everywhere.\r\n\r\nI'm so for real, [look at the smartlink](https://laylo.com/toxadil/okgOp). It's just gone now. Good thing I still have the final mix!",
         "rarity": "rare",
-        "src": "UP_ft_Livr.mp3"
+        "src": "UP_ft_Livr.mp3",
+        "sets": [
+            "legacy"
+        ]
     },
     {
         "title": "DOUBLE UP",
@@ -261,7 +273,10 @@
         "title": "Pullin Up",
         "description": "Released November 6, 2021 as part of Jalisa's album <i>Lil Soulo</i> on [all streaming platforms](https://open.spotify.com/intl-de/album/4GMKelRPpIQM4aAp3aoMjZ).",
         "rarity": "common",
-        "src": "Pullin Up (feat. ToxiPlays).mp3"
+        "src": "Pullin Up (feat. ToxiPlays).mp3",
+        "sets": [
+            "legacy"
+        ]
     },
     {
         "title": "Lied to You",
