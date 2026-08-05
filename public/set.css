@@ -39,3 +39,57 @@ img.set-icon {
     transform: translateY(0);
     font-size: 110%;
 }
+
+.dropdown-icon {
+    cursor: pointer;
+}
+
+.text-field {
+  color: rgb(255, 255, 255);
+  text-decoration: none;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  padding: 10px 20px;
+  font-size: 17px;
+  font-weight: bold;
+  background: transparent;
+  position: relative;
+  transition: all 1s;
+  overflow: hidden;
+}
+
+.share-snapshot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-flow: column;
+    padding: 5%;
+    padding-bottom: 1%;
+    padding-top: 1%;
+}
+
+.card-snapshot-icon {
+    padding-right: 1em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-snapshot-icon > img {
+    height: 100%;
+    width: 80%;
+    margin-top: 13%;
+}
+
+.card-progress {
+    transition: 0s !important;
+}
+
+.card-id {
+    font-family: 'Bitcount Grid Single';
+}
+
+.card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

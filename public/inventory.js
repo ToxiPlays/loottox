@@ -11,7 +11,6 @@ function log(str) {
     document.getElementById("debug-status").textContent = str;
 }
 
-
 const canvas = document.createElement('canvas')
 const ctx = canvas.getContext('2d')
 

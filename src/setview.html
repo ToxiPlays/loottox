@@ -17,10 +17,12 @@
     <link rel="icon" type="image/png" href="/icons/favicon-16x16.png" sizes="16x16" />
     <link rel="icon" type="image/png" href="/icons/favicon-128.png" sizes="128x128" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=arrow_drop_down" />
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script>
         globalThis.setAttributes = {
             name: "{FULLNAME}",
             description: "{DESCRIPTION}",
+            slug: "{SLUG}",
             songLength: `{SONGLENGTH}`,
             img: "/sets/icons/{ICONURL}"
         }
@@ -51,8 +53,38 @@
         </div>
         <div class="song-ctn">
         </div>
-        <div class="button-container">
+        <div class="button-container hidden">
+            <input class="text-field hidden" id="username" placeholder="WHAT'S YOUR NAME?"/>
             <button class="btn" id="share-btn">Share progress</button>
+        </div>
+        <div class="share-snapshot hidden">
+            <div class="card">
+                <div class="card-icon card-snapshot-icon"><img class="set-icon" src="/sets/icons/{ICONURL}"/></div>
+                <div class="card-body">
+                    <h3 class="card-title">CARD TITLE</h3>
+                    <p class="card-sub">CARD SUBTITLE</p>
+                    <div class="card-prog-track">
+                        <div class="card-progress" style="width:0%"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="snapshot-song-ctn">
+
+            </div>
+            <p class="footer">What songs will you pull today?</p>
+            <h4 class="card-id">LOOTTOX</h4>
+        </div>
+        <div class="modal-container hidden">
+            <div class="modal" id="share-preview-modal">
+                <h2>Your Progress on {FULLNAME}</h2>
+                <div class="canvas-holder"></div>
+                <div class="share-btns-modal">
+                    <button class="btn" id="save-btn">Save</button>
+                    <button class="btn" id="share2-btn">Share</button>
+                    <button class="btn" id="copy-btn">Copy to Clipboard</button>
+                    <button class="btn" id="close-btn">Close</button>
+                </div>
+            </div>
         </div>
     </main>
 </body>

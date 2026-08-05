@@ -961,7 +961,8 @@ app.get(('/sets/:slug'), (req, res) => {
         const modifiedContent = data.replaceAll('{FULLNAME}', set.name)
         .replaceAll('{DESCRIPTION}', set.description.replaceAll("\r\n","<br/>"))
         .replaceAll('`{SONGLENGTH}`', songTitles.length)
-        .replaceAll('{ICONURL}', `${set.icon}`);
+        .replaceAll('{ICONURL}', `${set.icon}`)
+        .replaceAll('{SLUG}', set.slug);
         res.send(modifiedContent);
     });
 });
@@ -1005,6 +1006,7 @@ app.get('/api/set-progress/:slug', (req, res) => {
 
 app.use(express.static('public'));
 app.use('/vendor/wavesurfer', express.static('./node_modules/wavesurfer.js/dist'));
+app.use('/vendor/html2canvas', express.static('./node_modules/html2canvas/dist'));
 app.use('/sets/icons', express.static(path.resolve('./sets/icons')));
 
 if (!process.env.VERCEL) {
