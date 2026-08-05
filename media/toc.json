@@ -286,5 +286,24 @@
         "sets": [
             "homage"
         ]
+    },
+    {
+        "title": "MORNING LOTUS",
+        "description": "<i>THE WORLD IS YOURS</i> promo-single released to [SoundCloud](https://soundcloud.com/toxiplays/morning-lotus) on August 2, 2026. Featuring vocals from looey.",
+        "rarity": "common",
+        "src": "morning_lotus_w_looey.mp3",
+        "sets": [
+            "twiy"
+        ]
+    },
+    {
+        "title": "MORNING LOTUS (Demo)",
+        "description": "The most-complete demo of [\"MORNING LOTUS\"](https://soundcloud.com/toxiplays/morning-lotus) from <i>THE WORLD IS YOURS</i>. Features an unheard spoken-word outro.",
+        "rarity": "uncommon",
+        "src": "morning_lotus_w_looey (1).mp3",
+        "sets": [
+            "twiy",
+            "remixes"
+        ]
     }
 ]
