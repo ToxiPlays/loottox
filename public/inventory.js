@@ -1,6 +1,8 @@
-
+import { loadInventoryTTML } from './inventory-ttml.js';
 import WaveSurfer from '/vendor/wavesurfer/wavesurfer.js';
 import { parseTrackString, stringifyTracks } from "./history-helpers.js";
+
+let activeTTML = null;
 
 function log(str) {
     console.log(`%cLOG%c |%c ${str}`,
@@ -277,6 +279,9 @@ songHistoryArray.forEach((savedSong) => {
         songRow.querySelector(".when-available").classList.remove("hidden");
 
         h2.addEventListener('click', () => {
+            activeTTML?.destroy();
+            activeTTML = null;
+
             if (songRow.classList.contains('expanded')) {
                 songRow.classList.remove('expanded');
 
@@ -336,6 +341,14 @@ songHistoryArray.forEach((savedSong) => {
                     barWidth: 2,
                     url: `/api/${serverSong.unlocked ? "get" : "preview"}Song/${encodeURIComponent(serverSong.title)}`,
                 });
+
+                if (serverSong.unlocked) {
+                    activeTTML = loadInventoryTTML(
+                        songRow.querySelector('.ttml'),
+                        `/api/getTTML/${encodeURIComponent(serverSong.title)}`,
+                        wavesurfer
+                    );
+                }
 
                 if ('mediaSession' in navigator) {
                     let rarityIcon;

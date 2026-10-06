@@ -202,3 +202,20 @@ img.set-icon {
 }
 
 .modal {padding: 5%;border-radius: 4%;}
+
+.ttml
+.lyric {
+    text-align: center;
+    width: 88vw !important;
+}
+
+.ttml {
+    font-weight: 700;
+    font-size: x-large;
+    user-select: none;
+    width: 100% !important;
+}
+
+.censor-token {
+    filter: blur(6px);
+}
