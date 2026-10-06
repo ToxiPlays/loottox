@@ -93,3 +93,8 @@ img.set-icon {
     align-items: center;
     justify-content: center;
 }
+
+.card-title,
+.card-title i {
+    background-color: transparent;
+}

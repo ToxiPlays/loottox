@@ -17,6 +17,8 @@ if (!localStorage.getItem("song-history")) {
 let songHistoryString = localStorage.getItem("song-history");
 let songHistoryArray = parseTrackString(songHistoryString);
 let serverData;
+let currentCanvas = null;
+let currentUsername = null;
 
 log("Creating song shells...");
 
@@ -143,8 +145,7 @@ document.getElementById("share-btn").addEventListener("click", () => {
         document.querySelector(".snapshot-song-ctn").appendChild(x);
         document.querySelector(".card-sub").textContent = document.querySelector(".subtitle").textContent;
         document.querySelector(".card-progress").style = `width: ${((serverData.items.length / setAttributes.songLength) * 100).toFixed(2)}%;`
-        document.querySelector(".card-title").textContent = `${USERNAME}'s `;
-        document.querySelector(".card-title").innerHTML += `<i>${setAttributes.name}</i>`;
+        title.replaceChildren(`${USERNAME}'s `, Object.assign(document.createElement("i"), { textContent: setAttributes.name }))
     });
 
     document.getElementById("share-btn").textContent = "Please hold";
@@ -157,65 +158,73 @@ document.getElementById("share-btn").addEventListener("click", () => {
         scale: 2,
         backgroundColor: "#0f0404",
     }).then(canvas => {
+        currentCanvas = canvas;
+        currentUsername = USERNAME;
+
         document.querySelector(".canvas-holder").innerHTML = "";
         document.querySelector(".canvas-holder").appendChild(canvas);
         document.querySelector(".modal-container").classList.remove("hidden");
-        document.getElementById("save-btn").addEventListener("click", () => {
-            const pngUrl = canvas.toDataURL('image/png');
-            const a = document.createElement('a');
-            a.href = pngUrl;
-            a.download = `${USERNAME}'s progression on ${setAttributes.name} | Loottox.png`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        });
-        document.getElementById("copy-btn").addEventListener("click", () => {
-            canvas.toBlob(async (blob) => {
-                if (!blob) {
-                    console.error("Canvas conversion to Blob failed.");
-                    return;
-                }
-                const item = new ClipboardItem({ [blob.type]: blob });
-                await navigator.clipboard.write([item]);
-                document.getElementById("copy-btn").textContent = "Copied";
-            }, "image/png");
-        });
-        document.getElementById("close-btn").addEventListener("click", () => {
-            document.querySelector(".canvas-holder").innerHTML = "";
-            document.querySelector(".modal-container").classList.add("hidden");
-            USER_FIELD.classList.add("hidden");
-            document.getElementById("share-btn").textContent = "Share Progress";
-            document.getElementById("share-btn").disabled = false;
-        });
-        document.getElementById("share2-btn").addEventListener("click", () => {
-            canvas.toBlob(async (blob) => {
-                if (!blob) return;
-                
-                const file = new File([blob], "progression.png", { type: "image/png" });
-                const shareData = {
-                    title: `${setAttributes.name} | Loottox`,
-                    text: `👀 I've unlocked ${serverData.items.length} of the ${setAttributes.songLength} songs available in the ${setAttributes.name} set in Loottox so far. How about you?\n\n${document.location.href}`,
-                    files: [file],
-                };
-
-                if (navigator.canShare && navigator.canShare(shareData)) {
-                    try {
-                        await navigator.share(shareData);
-                        log("Shared successfully");
-                    } catch (err) {
-                        if (err.name !== "AbortError") {
-                            console.error("Error sharing:", err);
-                            document.getElementById("share2-btn").textContent = "Error";
-                        }
-                    }
-                } else {
-                    document.getElementById("share2-btn").textContent = "Unsupported";
-                    document.getElementById("share2-btn").disabled = true;
-                    setTimeout(() =>{
-                        document.getElementById("share2-btn").classList.add("hidden", 5000);
-                    }, 3000);
-                }
-            }, "image/png");
-        });
     });
+});
+
+document.getElementById("save-btn").addEventListener("click", () => {
+    if (!currentCanvas) return;
+    const a = document.createElement("a");
+    a.href = currentCanvas.toDataURL("image/png");
+    a.download = `${currentUsername}'s progression on ${setAttributes.name} | Loottox.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+});
+
+document.getElementById("copy-btn").addEventListener("click", () => {
+    if (!currentCanvas) return;
+    currentCanvas.toBlob(async (blob) => {
+        if (!blob) {
+            console.error("Canvas conversion to Blob failed.");
+            return;
+        }
+        await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+        document.getElementById("copy-btn").textContent = "Copied";
+    }, "image/png");
+});
+
+document.getElementById("close-btn").addEventListener("click", () => {
+    document.querySelector(".canvas-holder").innerHTML = "";
+    document.querySelector(".modal-container").classList.add("hidden");
+    document.getElementById("username").classList.add("hidden");
+    document.getElementById("share-btn").textContent = "Share Progress";
+    document.getElementById("share-btn").disabled = false;
+    currentCanvas = null;
+});
+
+document.getElementById("share2-btn").addEventListener("click", () => {
+    if (!currentCanvas) return;
+    currentCanvas.toBlob(async (blob) => {
+        if (!blob) return;
+
+        const file = new File([blob], "progression.png", { type: "image/png" });
+        const shareData = {
+            title: `${setAttributes.name} | Loottox`,
+            text: `👀 I've unlocked ${serverData.items.length} of the ${setAttributes.songLength} songs available in the ${setAttributes.name} set in Loottox so far. How about you?\n\n${document.location.href}`,
+            files: [file],
+        };
+
+        if (navigator.canShare && navigator.canShare(shareData)) {
+            try {
+                await navigator.share(shareData);
+                log("Shared successfully");
+            } catch (err) {
+                if (err.name !== "AbortError") {
+                    console.error("Error sharing:", err);
+                    document.getElementById("share2-btn").textContent = "Error";
+                }
+            }
+        } else {
+            const btn = document.getElementById("share2-btn");
+            btn.textContent = "Unsupported";
+            btn.disabled = true;
+            setTimeout(() => btn.classList.add("hidden"), 3000);
+        }
+    }, "image/png");
 });
