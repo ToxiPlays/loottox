@@ -311,7 +311,10 @@
         "title": "no cloverz",
         "description": "Non-canon loosie released in preparation for <i>THE WORLD IS YOURS</i> [exclusively to SoundCloud](https://soundcloud.com/toxiplays/no-cloverz) on September 18, 2026. It's one of the only American tragedies to have happened in September.",
         "rarity": "common",
-        "src": "no_cloverz_Prod_MageLN_x_ProdBingoo.mp3"
+        "src": "no_cloverz_Prod_MageLN_x_ProdBingoo.mp3",
+        "sets": [
+            "aquatic"
+        ]
     },
     {
         "title": "KNICKS IN SIX",
@@ -326,13 +329,19 @@
         "title": "Aladdin",
         "description": "Featuring vocals from Money Mida$, released [exclusively to SoundCloud](https://soundcloud.com/toxiplays/aladdin) on August 9, 2026.",
         "rarity": "common",
-        "src": "aladdin_prod_lerma_lab.mp3"
+        "src": "aladdin_prod_lerma_lab.mp3",
+        "sets": [
+            "aquatic"
+        ]
     },
     {
         "title": "THROW IT UP (OG)",
         "description": "Recorded September 3rd, 2026 (four days before [the official release](https://open.spotify.com/album/0hCy2txFamJ2DlGCC3knx7)) without extra vocals and on a completely different beat sampling \"Hard in Da Paint\".",
         "rarity": "uncommon",
-        "src": "throw_it_up_demo_prod_zhine.mp3"
+        "src": "throw_it_up_demo_prod_zhine.mp3",
+        "sets": [
+            "aquatic"
+        ]
     },
     {
         "title": "pretty boy effect",
@@ -392,6 +401,24 @@
         "src": "nelle (with rei).mp3",
         "sets": [
             "homage"
+        ]
+    },
+    {
+        "title": "deeper",
+        "description": "Unreleased isdamenok remix of [\"i wish it was me (after all)\"](https://genius.com/Toxiplays-i-wish-it-was-me-after-all-lyrics) archived via SoundCloud on November 11, 2024.",
+        "rarity": "uncommon",
+        "src": "deeper prod isdamenok.mp3",
+        "sets": [
+            "remixes"
+        ]
+    },
+    {
+        "title": "drop",
+        "description": "Released September 15, 2026 [exclusively on SoundCloud](https://soundcloud.com/toxiplays/drop). Featuring vocals from Kid Wcked and 15caretaker.",
+        "rarity": "common",
+        "src": "drop (feat. caretaker) [Meownarch].mp3",
+        "sets": [
+            "aquatic"
         ]
     }
 ]
