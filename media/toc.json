@@ -39,7 +39,8 @@
         "src": "shots_in_the_air_prod_skitzo_ranger.mp3",
         "sets": [
             "yabwave",
-            "twiy"
+            "twiy",
+            "aquatic"
         ]
     },
     {
@@ -304,6 +305,93 @@
         "sets": [
             "twiy",
             "remixes"
+        ]
+    },
+    {
+        "title": "no cloverz",
+        "description": "Non-canon loosie released in preparation for <i>THE WORLD IS YOURS</i> [exclusively to SoundCloud](https://soundcloud.com/toxiplays/no-cloverz) on September 18, 2026. It's one of the only American tragedies to have happened in September.",
+        "rarity": "common",
+        "src": "no_cloverz_Prod_MageLN_x_ProdBingoo.mp3"
+    },
+    {
+        "title": "KNICKS IN SIX",
+        "description": "Made during finalization of <i>THE WORLD IS YOURS</i>, didn't make the cut",
+        "rarity": "legendary",
+        "src": "KNICKS_IN_SIX_prod_rumble.mp3",
+        "sets": [
+            "twiy"
+        ]
+    },
+    {
+        "title": "Aladdin",
+        "description": "Featuring vocals from Money Mida$, released [exclusively to SoundCloud](https://soundcloud.com/toxiplays/aladdin) on August 9, 2026.",
+        "rarity": "common",
+        "src": "aladdin_prod_lerma_lab.mp3"
+    },
+    {
+        "title": "THROW IT UP (OG)",
+        "description": "Recorded September 3rd, 2026 (four days before [the official release](https://open.spotify.com/album/0hCy2txFamJ2DlGCC3knx7)) without extra vocals and on a completely different beat sampling \"Hard in Da Paint\".",
+        "rarity": "uncommon",
+        "src": "throw_it_up_demo_prod_zhine.mp3"
+    },
+    {
+        "title": "pretty boy effect",
+        "description": "Here's an album cut from the upcoming cheat code anthem debut ^_^",
+        "rarity": "legendary",
+        "src": "pretty_boy_effect_prod_twilo.mp3"
+    },
+    {
+        "title": "calm after the storm",
+        "description": "Eventually this will be recorded on a real mic. But I mean, it's all there. Welcome to the <i>cult crusher</i> era!\r\n\r\nIn an alternate Yabless universe, this was the intro to [THE WORLD IS YOURS](https://ffm.to/toxiplays-the-world-is-yours).",
+        "rarity": "legendary",
+        "src": "a_backseat_lover_prod_thehardesthitting.mp3",
+        "sets": [
+            "cult-crusher"
+        ]
+    },
+    {
+        "title": "UNAPOLOGETIC",
+        "description": "Finished May 14, 2026. I think this was supposed to be on [<i>DON'T KNOCK THE GRIND</i>](https://open.spotify.com/album/14anZ2sibldEkUX0zJeIuE)? Or something around that time? It was made a few months after so not sure what's up with that.",
+        "rarity": "legendary",
+        "src": "unapologetic_prod_seyah.mp3",
+        "sets": [
+            "cult-crusher"
+        ]
+    },
+    {
+        "title": "VISUAL LEARNER",
+        "description": "Mobile demo dated March 8, 2026. A LOOOOOTT of names in here aged badly and I just... can't. Sorry about the censors.",
+        "rarity": "legendary",
+        "src": "visual_learner.mp3",
+        "sets": [
+            "cult-crusher"
+        ]
+    },
+    {
+        "title": "rock me 2 sleep",
+        "description": "A [freshly-disillusioned](https://genius.com/Toxiplays-showstopper-lyrics?referent_id=38817873#note-38817873) ToxiPlays wrote and recorded this song during early September 2025 whilst hiding away from the world for the now-scrapped, would-be finale EP, <i>your music taste sucks</i>. \r\n\r\nNote that due to me being a good person and making up with people after the full year that passed, some lyrics have been cut for this Loottox debut.",
+        "rarity": "legendary",
+        "src": "rock_me_2_sleep_4_loottox_prod_twilo.mp3",
+        "sets": [
+            "cult-crusher"
+        ]
+    },
+    {
+        "title": "RAISE THE BAR (OG)",
+        "description": "Recorded April 15, 2026. The demo for \"RAISE THE BAR\" features a completely different beat courtesy of 99LA and verses.",
+        "rarity": "uncommon",
+        "src": "raise_the_barrrr_prod_mina.mp3",
+        "sets": [
+            "twiy"
+        ]
+    },
+    {
+        "title": "nelle",
+        "description": "Toxi's first release of 2025 [exclusively to YouTube](https://www.youtube.com/watch?v=FBTFoklFe-M) and [SoundCloud](https://soundcloud.com/toxiplays/nelle). Featuring vocals from Rei.",
+        "rarity": "common",
+        "src": "nelle (with rei).mp3",
+        "sets": [
+            "homage"
         ]
     }
 ]

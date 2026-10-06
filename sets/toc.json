@@ -7,7 +7,7 @@
     },
     {
         "name": "Homage",
-        "description": "Everything in this set is paying homage to <em>somebody</em> somehow\r\n\r\n[Art credit](https://x.com/watta_jump)",
+        "description": "Everything in this set is paying homage to <em>somebody</em> somehow",
         "icon": "homage.jpg",
         "slug": "homage"
     },
@@ -28,5 +28,17 @@
         "description": "These songs are part of my legacy, recorded long before I could've ever dreamed of my current era\r\n\r\n[Art credit](https://x.com/qiukuuuuuuuu/status/1944074363789357385?t=lwWFcvfsKfMTKB5Ll3dl_A&s=09)",
         "icon": "legacy.jpg",
         "slug": "legacy"
+    },
+    {
+        "name": "AQUATIC's Very Own",
+        "description": "Hit singles cataloguing the transitional periods for [AQUATIC RECORDS](https://genius.com/artists/Aquatic-records)' final line of defense",
+        "icon": "aquatic.jpg",
+        "slug": "aquatic"
+    },
+    {
+        "name": "cult crusher/ymts era",
+        "description": "<strong>Refer to me as ToxiPlays, the fuckin' cult crusher.</strong>\r\n\r\nAn unfiltered introspection on my ups-and-downs during a faulty relationship, [disillusionment](https://genius.com/Toxiplays-showstopper-lyrics?referent_id=38817873#note-38817873), and membership in the &quot;bitches on broomsticks&quot; band. May or may not get a real release depending on if my brain stays unstable.",
+        "icon": "cult-crusher.jpg",
+        "slug": "cult-crusher"
     }
 ]
