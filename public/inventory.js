@@ -74,7 +74,7 @@ let songHistoryArray = parseTrackString(songHistoryString);
 
 log("Performing data integrity checks...");
 
-const THRESHOLD = 1/1784955694792; // Epoch timestamp that inventory was added
+const THRESHOLD = 1784955694792; // Epoch timestamp that inventory was added
 
 let rewriteNecessary = false;
 let cleanSongArray = [];
@@ -180,6 +180,20 @@ if (serverData.items.length < 1) {
     document.location.replace("/404");
 }
 
+function slugify(text) {
+  if (!text) return '';
+
+  return text
+    .toString()                          
+    .normalize('NFKD')                    
+    .replace(/[\u0300-\u036f]/g, '')   
+    .toLowerCase()                        
+    .trim()                               
+    .replace(/[^a-z0-9\s-]/g, '')        
+    .replace(/[\s-]+/g, '-')              
+    .replace(/^-+|-+$/g, '');             
+}
+
 log("Displaying data...");
 
 let songTemplate = document.querySelector(".song-row.template");
@@ -233,6 +247,24 @@ songHistoryArray.forEach((savedSong) => {
         case 9:
             pullno = "ninth"
             break;
+        case 10:
+            pullno = "tenth"
+            break;
+        case 11:
+            pullno = "eleventh"
+            break;
+        case 12:
+            pullno = "twelfth"
+            break;
+        case 13:
+            pullno = "thirteenth"
+            break;
+        case 14:
+            pullno = "fourteenth"
+            break;
+        case 15:
+            pullno = "fifteenth"
+            break;
         default:
             pullno = savedSong.tx.toString();
             switch (savedSong.tx % 10) { // last digit
@@ -249,7 +281,7 @@ songHistoryArray.forEach((savedSong) => {
                     pullno += "st"
                     break;
                 case 2:
-                    pullno = "nd"
+                    pullno += "nd"
                     break;
                 case 3:
                     pullno = "rd"
@@ -260,6 +292,7 @@ songHistoryArray.forEach((savedSong) => {
 
     songRow.innerHTML = songRow.innerHTML
         .replaceAll("%SONGNAME%", savedSong.title)
+        .replaceAll("%SONGLINK%", `<a class="body-link" target="loottox-song" href="/songs/${slugify(savedSong.title)}">${savedSong.title}</a>`)
         .replaceAll("%TIMEAGO%", getRelativeTimeIntl(savedSong.time))
         .replaceAll("%FULLDATE%", new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }).format(savedSong.time))
         .replaceAll("%PULLNO%", pullno)
@@ -486,6 +519,76 @@ fakeCtn.classList.add("hidden");
 
 log("Songs loaded!");
 
+function initSetsScroller(wrap) {
+    const SPEED = 30;            // px/sec idle drift
+    const RESUME_DELAY = 1500;   // ms of idle after the user lets go
+    const DRAG_THRESHOLD = 4;    // px before a press counts as a drag
+
+    let pos = 0, dir = 1, last = performance.now(), lastSet = 0, resumeAt = 0;
+    let pressed = false, dragging = false, moved = false;
+    let startX = 0, startScroll = 0, activePointer = null;
+
+    function tick(t) {
+        const dt = Math.min((t - last) / 1000, 0.1);
+        last = t;
+
+        // scrollLeft changed without us setting it (wheel, touch, keyboard): back off
+        if (Math.abs(wrap.scrollLeft - lastSet) > 1.5) {
+            resumeAt = t + RESUME_DELAY;
+        }
+
+        const max = wrap.scrollWidth - wrap.clientWidth;
+        if (pressed || t < resumeAt || max <= 0) {
+            pos = lastSet = wrap.scrollLeft;   // stay in sync with the user
+        } else {
+            pos += dir * SPEED * dt;
+            if (pos >= max) { pos = max; dir = -1; }
+            if (pos <= 0)   { pos = 0;   dir = 1; }
+            wrap.scrollLeft = pos;
+            lastSet = wrap.scrollLeft;
+        }
+        requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+
+    wrap.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        pressed = true; moved = false; dragging = false;
+        startX = e.clientX; startScroll = wrap.scrollLeft;
+        activePointer = e.pointerId;
+    });
+
+    wrap.addEventListener('pointermove', (e) => {
+        if (!pressed || e.pointerId !== activePointer) return;
+        if (e.pointerType === 'touch') return;   // touch scrolls natively
+        const dx = e.clientX - startX;
+        if (!dragging && Math.abs(dx) > DRAG_THRESHOLD) {
+            dragging = moved = true;
+            wrap.setPointerCapture(e.pointerId);  // capture only once it's a real drag
+            wrap.classList.add('dragging');
+        }
+        if (dragging) wrap.scrollLeft = startScroll - dx;
+    });
+
+    const release = () => {
+        if (!pressed) return;
+        pressed = false;
+        dragging = false;
+        activePointer = null;
+        wrap.classList.remove('dragging');
+        resumeAt = performance.now() + RESUME_DELAY;
+    };
+    wrap.addEventListener('pointerup', release);
+    wrap.addEventListener('pointercancel', release);
+
+    // a drag that ends over a card link shouldn't navigate
+    wrap.addEventListener('click', (e) => {
+        if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; }
+    }, true);
+
+    wrap.addEventListener('dragstart', (e) => e.preventDefault());
+}
+
 if (serverData.sets.length > 0) {
     log("Loading sets...");
     let template = document.querySelector(".card.template");
@@ -507,6 +610,7 @@ if (serverData.sets.length > 0) {
     });
     document.querySelector(".sets-ctn").classList.remove("hidden");
     document.querySelector(".sets-wrapper").classList.remove("hidden");
+    initSetsScroller(document.querySelector(".sets-wrapper"));
     template.remove();
 
 } else {
