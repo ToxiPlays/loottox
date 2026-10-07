@@ -284,7 +284,7 @@ songHistoryArray.forEach((savedSong) => {
                     pullno += "nd"
                     break;
                 case 3:
-                    pullno = "rd"
+                    pullno += "rd"
                     break;
                 }
             break;
