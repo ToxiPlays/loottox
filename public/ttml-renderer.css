@@ -23,14 +23,15 @@
 }
 
 .ttml-line {
+    position: relative;
     font-size: 1.5rem;
     line-height: 1.5;
     color: #888;
     width: 85% !important;
+    opacity: var(--line-opacity, 1);
     transition: color var(--active-dur, 0.5s) ease,
-                font-weight 0.1s ease,
-                opacity var(--active-dur, 1s) ease;
-    will-change: color;
+                font-weight 0.1s ease;
+    will-change: transform, opacity;
     align-items: left;
     --sweep-color: #ff607a;
 }
@@ -42,7 +43,6 @@
 
 .ttml-line.ttml-past {
     color: #555;
-    opacity: 0;
 }
 
 .ttml-scroller:hover > .ttml-line.ttml-past {
@@ -75,13 +75,8 @@
 }
 
 .ttml-main-row .ttml-token {
-    transform: translateY(-4px);
-    transition: transform var(--rise-dur, 0.3s) var(--rise-ease, ease-out);
+    transform: translateY(3px);
     will-change: transform;
-}
-
-.ttml-main-row .ttml-token.ttml-token--risen {
-    transform: translateY(0);
 }
 
 .ttml-token--split {
@@ -92,9 +87,7 @@
 
 .ttml-letter {
     display: inline-block;
-    transform: translateY(-10px);
-    transition: transform var(--rise-dur, 0.3s) var(--rise-ease, ease-out);
-    transition-delay: var(--rise-delay, 0s);
+    transform: translateY(3px);
     will-change: transform;
     background: linear-gradient(
         to right,
@@ -110,34 +103,24 @@
     background-clip: text;
 }
 
-.ttml-letter.ttml-letter--risen {
-    transform: translateY(0);
-}
-
 .ttml-adlib-row {
+    position: absolute;
+    top: 100%;
+    left: 0;
     display: block;
-    font-size: 0.78em;
+    font-size: 0.7em;
     color: inherit;
-    opacity: 0.6;
-    margin-top: 0.15em;
+    opacity: 0; /* driven by JS */
+    padding-top: 0.15em;
     width: 100% !important;
-    transition: all 0.5s ease-in-out;
-}
-
-.ttml-adlib-hidden {
-    opacity: 0 !important;
+    pointer-events: none;
+    will-change: transform, opacity;
 }
 
 .ttml-adlib-token {
     display: inline-block;
-    /* font-size modified by js */
-    font-size: 85%;
-    transition: font-size var(--adlib-rise-dur, 0.3s) ease;
-}
-
-.ttml-adlib-token.ttml-adlib-token--risen {
-    /* font-size modified by js */
-    font-size: 90%;
+    transform: translateY(3px); /* rise driven by JS, same as main tokens */
+    will-change: transform;
 }
 
 .ttml-gap-line {

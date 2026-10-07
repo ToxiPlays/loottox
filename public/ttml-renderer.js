@@ -2,8 +2,89 @@ const GAP_THRESHOLD = 5;     // seconds — gaps longer than this get an interst
 const ADLIB_PRE     = 0.5;   // seconds before first adlib token to show the row
 const ADLIB_POST    = 0.5;   // seconds after last adlib token to hide the row
 
+// Ad-lib presence: fade in/out AND push/retract of the lines below (seconds)
+const ADLIB_FADE    = 0.5;
+const ADLIB_OPACITY = 0.6;
+
+// Token rise: start at -RISE_PX, ease out to 0 over (token duration * RISE_DUR_MULT)
+const RISE_PX       = 3;
+const RISE_DUR_MULT = 1.2;
+
+// Scroll / line-discard behaviour, chosen by the gap between a line's end and the next line's start
+const GAP_SHORT           = 0.3;  // gap <  this: native smooth scroll (original behaviour)
+const GAP_LONG            = 1.0;  // gap >= this: "long" mode; between the two: "medium" mode
+const MEDIUM_SCROLL_FRAC  = 0.15; // medium: scroll + fade length as a fraction of the NEXT line's duration
+const MIN_SCROLL_DUR      = 0.2;  // medium: floor so very short lines don't snap (set 0 to disable)
+const LONG_HANG_FRAC      = 0.15; // long: hold current line for this fraction of the gap
+const LONG_MOVE_FRAC      = 0.75; // long: scroll + fade over this fraction; the remainder highlights next line
+const QUICK_FADE_DUR      = 0.5;  // fade used for short gaps, interstitial gaps and the last line
+
 function easeOutCubic(x) {
     return 1 - Math.pow(1 - x, 3);
+}
+
+function easeInOutCubic(x) {
+    return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+}
+
+function clamp01(x) {
+    return x < 0 ? 0 : x > 1 ? 1 : x;
+}
+
+// Vertical offset for a token/letter: -RISE_PX before it starts, easing out to 0
+// over (duration * RISE_DUR_MULT), i.e. slightly past the token's own end.
+function riseOffset(b, e, t) {
+    if (t <= b) return RISE_PX;
+    const d = (e - b) * RISE_DUR_MULT;
+    if (d <= 0 || t >= b + d) return 0;
+    return RISE_PX * (1 - easeOutCubic((t - b) / d));
+}
+
+// Leaves are the elements that get swept + risen: letters of a split long word,
+// the token span itself otherwise, or an ad-lib token span.
+function getMainLeaves(tokEl) {
+    return tokEl.classList.contains('ttml-token--split')
+        ? Array.from(tokEl.querySelectorAll('.ttml-letter'))
+        : [tokEl];
+}
+
+// A group = a set of leaves updated together, with cached timing so settled
+// groups (before / after their window) cost nothing per frame.
+function makeGroup(leaves) {
+    let tStart = Infinity, tSettle = -Infinity;
+    leaves.forEach(leaf => {
+        leaf._b = parseFloat(leaf.dataset.begin);
+        leaf._e = parseFloat(leaf.dataset.end);
+        tStart  = Math.min(tStart, leaf._b);
+        tSettle = Math.max(tSettle, leaf._e, leaf._b + (leaf._e - leaf._b) * RISE_DUR_MULT);
+    });
+    return { leaves, tStart, tSettle, phase: null };
+}
+
+function setLeaves(leaves, pct, offsetPx) {
+    const transform = `translateY(${offsetPx}px)`;
+    leaves.forEach(leaf => {
+        leaf.style.setProperty('--sweep-pct', `${pct}%`);
+        leaf.style.transform = transform;
+    });
+}
+
+function updateLeaf(leaf, t) {
+    const b = leaf._b, e = leaf._e;
+    const pct = t >= e ? 100 : t <= b ? 0 : ((t - b) / (e - b)) * 100;
+    leaf.style.setProperty('--sweep-pct', `${pct.toFixed(2)}%`);
+    leaf.style.transform = `translateY(${riseOffset(b, e, t).toFixed(2)}px)`;
+}
+
+function updateGroup(group, t) {
+    if (t < group.tStart) {
+        if (group.phase !== 'pre')  { setLeaves(group.leaves, 0, RISE_PX); group.phase = 'pre'; }
+    } else if (t >= group.tSettle) {
+        if (group.phase !== 'post') { setLeaves(group.leaves, 100, 0);      group.phase = 'post'; }
+    } else {
+        group.phase = 'live';
+        group.leaves.forEach(leaf => updateLeaf(leaf, t));
+    }
 }
 
 /**
@@ -237,10 +318,16 @@ export function mountTTMLRenderer(container, lines, wavesurfer) {
         });
         el.appendChild(mainRow);
         el.mainRow = mainRow;
+        el.group = makeGroup(
+            Array.from(mainRow.querySelectorAll('.ttml-token')).flatMap(getMainLeaves)
+        );
 
+        // Ad-lib rows are absolutely positioned (zero layout height). While shown,
+        // the frame loop pushes later lines down by the row's height.
         el.adlibRowEls = line.adlibs.map(adlib => {
             const row = document.createElement('div');
-            row.className = 'ttml-adlib-row ttml-adlib-hidden';
+            row.className = 'ttml-adlib-row';
+            const tokenEls = [];
             adlib.tokens.forEach((token, ti) => {
                 if (ti > 0 && token.spaceBefore) row.appendChild(document.createTextNode(' '));
                 const span = document.createElement('span');
@@ -249,9 +336,10 @@ export function mountTTMLRenderer(container, lines, wavesurfer) {
                 span.dataset.begin = token.begin;
                 span.dataset.end   = token.end;
                 row.appendChild(span);
+                tokenEls.push(span);
             });
             el.appendChild(row);
-            return { el: row, adlib };
+            return { el: row, adlib, group: makeGroup(tokenEls), h: null, op: -1, ty: null };
         });
 
         scroller.appendChild(el);
@@ -278,15 +366,6 @@ export function mountTTMLRenderer(container, lines, wavesurfer) {
         return wavesurfer.getCurrentTime();
     }
 
-    // Returns the set of line indices currently active (begin <= t < end)
-    function findActiveIndices(t) {
-        const active = new Set();
-        for (let i = 0; i < lines.length; i++) {
-            if (t >= lines[i].begin && t < lines[i].end) active.add(i);
-        }
-        return active;
-    }
-
     function findActiveGap(t) {
         for (const gap of gaps) {
             if (t >= gap.begin && t < gap.end) return gap;
@@ -294,89 +373,78 @@ export function mountTTMLRenderer(container, lines, wavesurfer) {
         return null;
     }
 
+    // Duration of the colour transition when a line becomes highlighted
+    // (long-gap lines override this with the remaining 10% of the gap).
     function getTransitionDuration(lineIdx) {
         const nextBegin = lines[lineIdx + 1]?.begin ?? (lines[lineIdx].end + 0.5);
         return Math.max(0.5, nextBegin - lines[lineIdx].end);
     }
 
-    // Returns the "leaf" elements that should be animated/swept for a given
-    // top-level main-row token span -- either the letters of a split long
-    // word, or the token span itself.
-    function getMainLeaves(tokEl) {
-        return tokEl.classList.contains('ttml-token--split')
-            ? Array.from(tokEl.querySelectorAll('.ttml-letter'))
-            : [tokEl];
-    }
+    // ------------------------------------------------------------------
+    // Schedules
+    //
+    // entrySched[j] describes how focus moves TO line j, chosen by the gap
+    // between line j-1's end and line j's begin (line 0 uses prevEnd = 0):
+    //   short  (< 0.3s)   native smooth scroll when the line becomes current
+    //   medium (0.3-1s)   hold previous line; at j.begin scroll + fade over
+    //                     15% of line j's duration (ease out)
+    //   long   (1-5s)     hang 15% of gap; scroll (ease in/out) + fade over
+    //                     75%; highlight line j over the final 10%
+    //   interstitial      (> GAP_THRESHOLD) gap line owns scrolling
+    //
+    // exitSched[i] is the matching fade-out window for line i.
+    // ------------------------------------------------------------------
+    const entrySched = lines.map((line, j) => {
+        const prevEnd = j === 0 ? 0 : lines[j - 1].end;
+        const gap     = line.begin - prevEnd;
 
-    // Vertical "rise" offset for a main-line token/letter as it is sung
-    function updateRise(el, t) {
-        const begin = parseFloat(el.dataset.begin);
-        const end   = parseFloat(el.dataset.end);
-        const isLongLeaf = el.classList.contains('ttml-letter');
-        let offsetPx;
-        if (isLongLeaf) {
-            if (t <= begin) {
-                offsetPx = 4;
-            } else if (t >= end) {
-                offsetPx = 0;
-            } else {
-                const progress = (t - begin) / (end - begin);
-                offsetPx = 4 * easeOutCubic(progress);
-            }
-        } else {
-            if (t <= begin) {
-                offsetPx = 4;
-            } else if (t >= end) {
-                offsetPx = 0;
-            } else {
-                const progress = (t - begin) / (end - begin);
-                offsetPx = 4 * (1 - easeOutCubic(progress));
-            }
+        if (gap > GAP_THRESHOLD) {
+            return { mode: 'interstitial', start: line.begin, dur: 0,
+                     hlAt: line.begin, hlDur: getTransitionDuration(j) };
         }
-        el.style.transform = `translateY(${offsetPx.toFixed(2)}px)`;
-    }
-
-    function updateMainLeaf(el, t) {
-        updateSweep(el, t);
-        updateRise(el, t);
-    }
-
-    // Font-size for an ad-lib token: 80% while unsung, easing to 95% over
-    // its own [begin, end] window as it's sung.
-    function updateAdlibScale(tokenEl, t) {
-        const begin = parseFloat(tokenEl.dataset.begin);
-        const end   = parseFloat(tokenEl.dataset.end);
-        let scale;
-        if (t <= begin) {
-            scale = 85;
-        } else if (t >= end) {
-            scale = 90;
-        } else {
-            const progress = (t - begin) / (end - begin);
-            scale = 85 + easeOutCubic(progress) * 2.5;
+        if (gap >= GAP_LONG) {
+            return { mode: 'long',
+                     start: prevEnd + gap * LONG_HANG_FRAC,
+                     dur:   gap * LONG_MOVE_FRAC,
+                     ease:  easeInOutCubic,
+                     hlAt:  prevEnd + gap * (LONG_HANG_FRAC + LONG_MOVE_FRAC),
+                     hlDur: gap * (1 - LONG_HANG_FRAC - LONG_MOVE_FRAC) };
         }
-        tokenEl.style.fontSize = `${scale.toFixed(2)}%`;
-    }
-
-    function updateSweep(tokenEl, t) {
-        const begin = parseFloat(tokenEl.dataset.begin);
-        const end   = parseFloat(tokenEl.dataset.end);
-        if (t >= end) {
-            tokenEl.style.setProperty('--sweep-pct', '100%');
-        } else if (t <= begin) {
-            tokenEl.style.setProperty('--sweep-pct', '0%');
-        } else {
-            const pct = ((t - begin) / (end - begin)) * 100;
-            tokenEl.style.setProperty('--sweep-pct', `${pct.toFixed(2)}%`);
+        if (gap >= GAP_SHORT) {
+            return { mode: 'medium',
+                     start: line.begin,
+                     dur:   Math.max(MIN_SCROLL_DUR, (line.end - line.begin) * MEDIUM_SCROLL_FRAC),
+                     ease:  easeOutCubic,
+                     hlAt:  line.begin, hlDur: getTransitionDuration(j) };
         }
+        // Short gap or overlapping lines: scroll once the previous line has ended
+        return { mode: 'short', start: Math.max(line.begin, prevEnd), dur: 0,
+                 hlAt: line.begin, hlDur: getTransitionDuration(j) };
+    });
+
+    const exitSched = lines.map((line, i) => {
+        const next = entrySched[i + 1];
+        if (next && (next.mode === 'medium' || next.mode === 'long')) {
+            return { start: next.start, dur: next.dur, ease: easeOutCubic };
+        }
+        return { start: line.end, dur: QUICK_FADE_DUR, ease: easeOutCubic };
+    });
+
+    // ------------------------------------------------------------------
+    // Scrolling
+    // ------------------------------------------------------------------
+
+    // Scroll offset that centres `el`, including any ad-lib push currently
+    // applied to it (offsetTop ignores transforms).
+    function centerTop(el) {
+        const containerH  = container.clientHeight;
+        const elOffsetTop = el.offsetTop - scroller.offsetTop + (el._pushY || 0);
+        return Math.max(0, elOffsetTop - containerH / 2 + el.offsetHeight / 2);
     }
 
     function scrollToLine(el, smooth = true) {
         if (!el) return;
-        const containerH  = container.clientHeight;
-        const elOffsetTop = el.offsetTop - scroller.offsetTop;
-        const target = elOffsetTop - containerH / 2 + el.offsetHeight / 2;
-        container.scrollTo({ top: Math.max(0, target), behavior: smooth ? 'smooth' : 'instant' });
+        container.scrollTo({ top: centerTop(el), behavior: smooth ? 'smooth' : 'instant' });
     }
 
     function ensureGapLine(gap) {
@@ -415,106 +483,145 @@ export function mountTTMLRenderer(container, lines, wavesurfer) {
         bar.style.setProperty('--gap-pct', `${pct.toFixed(2)}%`);
     }
 
-    let lastScrollTarget = -1; // track which line we last scrolled to
+    let lastEntered = -2;    // last line whose entry schedule we've started
+    let scrollAnim  = null;  // active medium/long scroll: { j, from, start, dur, ease }
+
+    function updateScroll(t, inGap) {
+        // The interstitial gap line owns scrolling while it is showing
+        if (inGap) { scrollAnim = null; return; }
+
+        let j = -1;
+        for (let k = 0; k < entrySched.length; k++) {
+            if (entrySched[k].start <= t) j = k;
+        }
+
+        if (j !== lastEntered) {
+            lastEntered = j;
+            if (j === -1) {
+                scrollAnim = null;
+                container.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                const e = entrySched[j];
+                const custom = e.mode === 'medium' || e.mode === 'long';
+                if (custom && t < e.start + e.dur) {
+                    scrollAnim = { j, from: container.scrollTop, start: e.start, dur: e.dur, ease: e.ease };
+                } else {
+                    scrollAnim = null;
+                    scrollToLine(lineEls[j]);
+                }
+            }
+        }
+
+        if (scrollAnim) {
+            const a = scrollAnim;
+            const p = clamp01((t - a.start) / a.dur);
+            // Target is re-read every frame so ad-lib pushes / reflow can't leave us off-centre
+            const target = centerTop(lineEls[a.j]);
+            container.scrollTo({ top: a.from + (target - a.from) * a.ease(p), behavior: 'instant' });
+            if (p >= 1) scrollAnim = null;
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Lines
+    // ------------------------------------------------------------------
+    function setPush(el, y) {
+        y = +y.toFixed(2);
+        if (y === (el._pushY || 0)) return;
+        el._pushY = y;
+        el.style.transform = y ? `translateY(${y}px)` : '';
+    }
+
+    function updateLines(t) {
+        let pushed = 0; // cumulative space borrowed by ad-lib rows of earlier lines
+
+        if (gapLineEl && gapLineData.afterIdx === -1) setPush(gapLineEl, 0);
+
+        for (let i = 0; i < lineEls.length; i++) {
+            const el    = lineEls[i];
+            const entry = entrySched[i];
+            const exit  = exitSched[i];
+
+            // Lines below an ad-lib shift down only while it is showing
+            setPush(el, pushed);
+
+            // idle -> active (highlighted, stays through hold + fade) -> past
+            const exitEnd = exit.start + exit.dur;
+            const state = t < entry.hlAt ? 'idle' : t < exitEnd ? 'active' : 'past';
+            if (el._state !== state) {
+                el._state = state;
+                if (state === 'active') el.style.setProperty('--active-dur', `${entry.hlDur}s`);
+                el.classList.toggle('ttml-active', state === 'active');
+                el.classList.toggle('ttml-past',   state === 'past');
+            }
+
+            // Fade-out driven by the exit schedule
+            const fp = exit.dur > 0 ? clamp01((t - exit.start) / exit.dur) : (t >= exit.start ? 1 : 0);
+            const op = +(1 - exit.ease(fp)).toFixed(3);
+            if (op !== el._op) {
+                el._op = op;
+                el.style.setProperty('--line-opacity', op);
+            }
+
+            // Main-line tokens: sweep + rise
+            updateGroup(el.group, t);
+
+            // Ad-lib rows: fade, stack, and report the room they occupy
+            let stack = 0;
+            for (const ar of el.adlibRowEls) {
+                const a    = ar.adlib;
+                const inP  = clamp01((t - a.showAt) / ADLIB_FADE);
+                const outP = clamp01((t - a.hideAt) / ADLIB_FADE);
+                const vis  = easeInOutCubic(inP) * (1 - easeInOutCubic(outP));
+
+                const op2 = +(vis * ADLIB_OPACITY).toFixed(3);
+                if (op2 !== ar.op) { ar.op = op2; ar.el.style.opacity = op2; }
+
+                const ty = +stack.toFixed(2);
+                if (ty !== ar.ty) { ar.ty = ty; ar.el.style.transform = `translateY(${ty}px)`; }
+
+                if (vis > 0) {
+                    if (ar.h === null) ar.h = ar.el.offsetHeight;
+                    stack += ar.h * vis;
+                }
+                updateGroup(ar.group, t);
+            }
+            pushed += stack;
+
+            if (gapLineEl && gapLineData.afterIdx === i) setPush(gapLineEl, pushed);
+        }
+    }
 
     function frame() {
         if (destroyed) return;
         const t = getCurrentTime();
 
-        // --- Gap interstitial ---
         const activeGap = findActiveGap(t);
         if (activeGap) {
             ensureGapLine(activeGap);
             updateGapBar(activeGap, t);
-            lineEls.forEach(el => el.classList.remove('ttml-active', 'ttml-past'));
-            rafId = requestAnimationFrame(frame);
-            return;
         } else {
             removeGapLine();
         }
 
-        // --- Real lines ---
-        const activeIndices = findActiveIndices(t);
-
-        // Scroll to the first newly-active line (lowest index)
-        const firstActive = activeIndices.size > 0 ? Math.min(...activeIndices) : -1;
-        if (firstActive !== -1 && firstActive !== lastScrollTarget) {
-            scrollToLine(lineEls[firstActive]);
-            lastScrollTarget = firstActive;
-        }
-        if (activeIndices.size === 0) lastScrollTarget = -1;
-
-        lineEls.forEach((el, i) => {
-            const line = lines[i];
-            const isActive = activeIndices.has(i);
-            const isPast   = t >= line.end;
-
-            // --- Main line state ---
-            if (isActive) {
-                if (!el.classList.contains('ttml-active')) {
-                    el.classList.add('ttml-active');
-                    el.classList.remove('ttml-past');
-                    el.style.setProperty('--active-dur', `${getTransitionDuration(i)}s`);
-                }
-                el.mainRow.querySelectorAll('.ttml-token').forEach(tok => {
-                    getMainLeaves(tok).forEach(leaf => updateMainLeaf(leaf, t));
-                });
-            } else if (isPast) {
-                if (!el.classList.contains('ttml-past')) {
-                    el.classList.add('ttml-past');
-                    el.classList.remove('ttml-active');
-                    el.mainRow.querySelectorAll('.ttml-token').forEach(tok => {
-                        getMainLeaves(tok).forEach(leaf => {
-                            leaf.style.setProperty('--sweep-pct', '100%');
-                            leaf.style.transform = 'translateY(0px)';
-                        });
-                    });
-                }
-            } else {
-                el.classList.remove('ttml-active', 'ttml-past');
-                el.mainRow.querySelectorAll('.ttml-token').forEach(tok => {
-                    getMainLeaves(tok).forEach(leaf => {
-                        leaf.style.setProperty('--sweep-pct', '0%');
-                        leaf.style.transform = 'translateY(4px)';
-                    });
-                });
-            }
-
-            // --- Adlib rows — each governed independently ---
-            el.adlibRowEls.forEach(({ el: row, adlib }) => {
-                const visible = t >= adlib.showAt && t < adlib.hideAt;
-
-                if (visible) {
-                    row.classList.remove('ttml-adlib-hidden');
-                    // Sweep + grow adlib tokens on their own timeline
-                    row.querySelectorAll('.ttml-token').forEach(tok => {
-                        updateSweep(tok, t);
-                        updateAdlibScale(tok, t);
-                    });
-                } else {
-                    row.classList.add('ttml-adlib-hidden');
-                    // Reset sweep/size to the appropriate edge so it's ready when it appears
-                    row.querySelectorAll('.ttml-token').forEach(tok => {
-                        const tb = parseFloat(tok.dataset.begin);
-                        const te = parseFloat(tok.dataset.end);
-                        const sung = t >= te;
-                        tok.style.setProperty('--sweep-pct', sung ? '100%' : '0%');
-                        tok.style.fontSize = sung ? '90%' : '85%';
-                    });
-                }
-            });
-        });
+        updateLines(t);
+        updateScroll(t, !!activeGap);
 
         rafId = requestAnimationFrame(frame);
     }
 
+    // All visual state is derived from t each frame, so a seek only needs to
+    // restart the scroll bookkeeping.
     function onSeeked() {
-        lineEls.forEach(el => {
-            el.classList.remove('ttml-active', 'ttml-past');
-            el.adlibRowEls.forEach(({ el: row }) => row.classList.add('ttml-adlib-hidden'));
-        });
-        lastScrollTarget = -1;
+        scrollAnim  = null;
+        lastEntered = -2;
     }
+
+    // Cached ad-lib row heights go stale when the layout width changes
+    const resizeObserver = new ResizeObserver(() => {
+        lineEls.forEach(el => el.adlibRowEls.forEach(ar => { ar.h = null; }));
+    });
+    resizeObserver.observe(container);
 
     wavesurfer.on('seeking', onSeeked);
     rafId = requestAnimationFrame(frame);
@@ -523,6 +630,7 @@ export function mountTTMLRenderer(container, lines, wavesurfer) {
         destroy() {
             destroyed = true;
             if (rafId) cancelAnimationFrame(rafId);
+            resizeObserver.disconnect();
             wavesurfer.un('seeking', onSeeked);
             container.innerHTML = '';
         }
